@@ -37,7 +37,17 @@ import {
   ArrowUp,
   ArrowDown,
   GripVertical,
-  MoreHorizontal
+  MoreHorizontal,
+  Grid,
+  FileText,
+  MessageCircle,
+  Calendar,
+  Clock,
+  Plus,
+  MoreVertical,
+  ChevronDown,
+  ArrowLeft,
+  Check
 } from 'lucide-react';
 
 const App = () => {
@@ -56,6 +66,15 @@ const App = () => {
   const [newCommentInterval, setNewCommentInterval] = useState(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedLeadDetail, setSelectedLeadDetail] = useState(null);
+  const [sortBy, setSortBy] = useState('date_created');
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [filterIntent, setFilterIntent] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterChannel, setFilterChannel] = useState('all');
+  const [filterLeadScore, setFilterLeadScore] = useState('all');
+  const [filterDateRange, setFilterDateRange] = useState('all');
   const [leadsColumns, setLeadsColumns] = useState([
     { id: 'username', label: 'Username', sortable: true, visible: true, width: 'w-32' },
     { id: 'intent', label: 'Intent', sortable: true, visible: true, width: 'w-24' },
@@ -404,10 +423,10 @@ const App = () => {
   // Get intent class
   const getIntentClass = (intent) => {
     switch (intent) {
-      case 'hot': return 'intent-hot';
-      case 'warm': return 'intent-warm';
-      case 'cold': return 'intent-cold';
-      default: return 'intent-cold';
+      case 'hot': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'warm': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'cold': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -416,7 +435,7 @@ const App = () => {
     <div className="h-full flex flex-col bg-gray-900">
       <div className="flex items-center justify-between p-6 border-b border-gray-800">
         <div className="flex items-center">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
             <span className="text-white text-lg font-bold">C</span>
           </div>
           <h1 className="text-xl font-bold ml-3 text-white">Comvert</h1>
@@ -435,7 +454,7 @@ const App = () => {
             onClick={() => setCurrentPage('dashboard')}
             className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'dashboard' 
-                ? 'bg-indigo-600 text-white' 
+                ? 'bg-green-500 text-white' 
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
@@ -447,7 +466,7 @@ const App = () => {
             onClick={() => setCurrentPage('leads')}
             className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'leads' 
-                ? 'bg-indigo-600 text-white' 
+                ? 'bg-green-500 text-white' 
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
@@ -459,7 +478,7 @@ const App = () => {
             onClick={() => setCurrentPage('settings')}
             className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'settings' 
-                ? 'bg-indigo-600 text-white' 
+                ? 'bg-green-500 text-white' 
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
@@ -470,7 +489,7 @@ const App = () => {
         
         <div className="mt-8 pt-6 border-t border-gray-800">
           <div className="flex items-center px-4 py-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
                 {currentUser?.name?.charAt(0) || 'U'}
               </span>
@@ -609,69 +628,760 @@ const App = () => {
     return Array.from(leadMap.values());
   };
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setShowSortDropdown(false);
+        setShowFilterDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Get detailed lead information
+  const getLeadDetails = (username) => {
+    const leadComments = comments.filter(c => c.username === username);
+    const allLeads = getAllLeads();
+    const lead = allLeads.find(l => l.username === username);
+    
+    if (!lead) return null;
+
+    // Get all comments by this user
+    const userComments = comments.filter(c => c.username === username);
+    const lastComment = userComments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+    
+    // Get product interests from comments
+    const productInterests = userComments
+      .filter(c => c.intent_level === 'hot' || c.intent_level === 'warm')
+      .map(c => {
+        const videoTitle = getVideoTitle(c.video_id);
+        return {
+          product: videoTitle,
+          interest_level: c.intent_level,
+          comment: c.text,
+          date: c.timestamp
+        };
+      });
+
+    // Generate mock contact info
+    const mockContactInfo = {
+      email: Math.random() > 0.3 ? `${username.replace('@', '').toLowerCase()}@gmail.com` : 'N/A',
+      phone: Math.random() > 0.6 ? `${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}` : 'N/A',
+      location: Math.random() > 0.6 ? ['New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ'][Math.floor(Math.random() * 5)] : 'N/A',
+      timezone: Math.random() > 0.6 ? ['EST', 'PST', 'CST', 'MST'][Math.floor(Math.random() * 4)] : 'N/A'
+    };
+
+    return {
+      ...lead,
+      comments: userComments,
+      lastComment: lastComment,
+      productInterests: productInterests,
+      contactInfo: mockContactInfo,
+      totalComments: userComments.length,
+      firstSeen: userComments.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))[0]?.timestamp || 'N/A',
+      lastSeen: lastComment?.timestamp || 'N/A',
+      engagementScore: Math.floor(Math.random() * 100) + 1,
+      tags: lead.tags || [],
+      notes: lead.notes || ''
+    };
+  };
+
+  // Lead Detail Page component
+  const LeadDetailPage = ({ lead, onBack }) => {
+    const [activeTab, setActiveTab] = useState('summary');
+    if (!lead) return null;
+
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={onBack}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Leads</span>
+              </button>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button className="text-gray-600 hover:text-gray-900">Edit</button>
+              <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                Contact
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Lead Profile Header */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <div className="flex items-center space-x-6">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center border-4 border-green-200">
+              <span className="text-green-600 text-2xl font-bold">
+                {lead.username.charAt(1).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900">{lead.username}</h1>
+              <p className="text-gray-600">YouTube Comment Lead</p>
+            </div>
+          </div>
+          
+          {/* Lead Details */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+            <div>
+              <p className="text-sm text-gray-500">Program</p>
+              <p className="font-medium">YouTube Comments</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Lead ID</p>
+              <p className="font-medium">{lead.username.replace('@', '')}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Location</p>
+              <p className="font-medium">{lead.contactInfo?.location || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Property</p>
+              <p className="font-medium">YouTube Channel</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex space-x-8">
+            <button 
+              onClick={() => setActiveTab('summary')}
+              className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'summary' 
+                  ? 'border-green-500 text-green-500' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Summary
+            </button>
+            <button 
+              onClick={() => setActiveTab('details')}
+              className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'details' 
+                  ? 'border-green-500 text-green-500' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Details
+            </button>
+            <button 
+              onClick={() => setActiveTab('comments')}
+              className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'comments' 
+                  ? 'border-green-500 text-green-500' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Comments
+            </button>
+            <button 
+              onClick={() => setActiveTab('products')}
+              className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'products' 
+                  ? 'border-green-500 text-green-500' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Products
+            </button>
+            <button 
+              onClick={() => setActiveTab('conversations')}
+              className={`border-b-2 py-2 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'conversations' 
+                  ? 'border-green-500 text-green-500' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Conversations
+            </button>
+          </nav>
+        </div>
+
+        {/* Main Content */}
+        {activeTab === 'summary' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Comment History */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Comment History</h3>
+                  <select className="text-sm border border-gray-300 rounded px-2 py-1">
+                    <option>Last 12 months</option>
+                    <option>Last 6 months</option>
+                    <option>Last 3 months</option>
+                  </select>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">This year</span>
+                    <span className="font-medium">{lead.totalComments} comments</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Last year</span>
+                    <span className="font-medium">0 comments</span>
+                  </div>
+                  {/* Simple chart placeholder */}
+                  <div className="h-32 bg-gray-50 rounded flex items-end justify-between p-4">
+                    {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => (
+                      <div key={month} className="flex flex-col items-center">
+                        <div 
+                          className="w-4 bg-green-500 rounded-t"
+                          style={{ height: `${Math.random() * 60 + 20}px` }}
+                        ></div>
+                        <span className="text-xs text-gray-500 mt-1">{month}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" className="w-4 h-4" />
+                      <span className="text-sm text-gray-600">Compare to previous period</span>
+                    </label>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded text-sm">View History</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Interests */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Product Interests</h3>
+                <div className="space-y-3">
+                  {lead.productInterests && lead.productInterests.length > 0 ? (
+                    lead.productInterests.map((interest, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <div>
+                          <p className="font-medium text-gray-900">{interest.product}</p>
+                          <p className="text-sm text-gray-600">{interest.comment}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          interest.interest_level === 'hot' ? 'bg-orange-100 text-orange-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {interest.interest_level}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No product interests identified yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="space-y-6">
+              {/* Status Card */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Active Lead</h4>
+                    <p className="text-sm text-gray-600">Last comment: {lead.lastSeen}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Total Comments:</span>
+                    <span className="font-medium">{lead.totalComments}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Engagement Score:</span>
+                    <span className="font-medium">{lead.engagementScore}/100</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h4 className="font-medium text-gray-900 mb-4">Contact Information</h4>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="font-medium">{lead.contactInfo?.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Phone</p>
+                    <p className="font-medium">{lead.contactInfo?.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Timezone</p>
+                    <p className="font-medium">{lead.contactInfo?.timezone}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h4 className="font-medium text-gray-900 mb-4">Location</h4>
+                <div className="h-32 bg-gray-100 rounded flex items-center justify-center">
+                  <span className="text-gray-500">Map placeholder</span>
+                </div>
+                <div className="mt-3">
+                  <p className="font-medium text-gray-900">YouTube Channel</p>
+                  <p className="text-sm text-gray-600">Platform: YouTube</p>
+                  <p className="text-sm text-gray-600">Channel: {lead.username}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Comments Tab */}
+        {activeTab === 'comments' && (
+          <div className="space-y-6">
+            {/* Comments Header */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Comment Timeline</h3>
+                  <p className="text-sm text-gray-600">All comments by {lead.username} across all channels</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <select className="text-sm border border-gray-300 rounded px-3 py-2">
+                    <option>All Channels</option>
+                    <option>Tech Reviews</option>
+                    <option>Gaming Channel</option>
+                    <option>Cooking Tips</option>
+                    <option>Fitness Pro</option>
+                    <option>Travel Vlogs</option>
+                  </select>
+                  <button className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600">
+                    Export Comments
+                  </button>
+                </div>
+              </div>
+              
+              {/* Stats Row */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{lead.totalComments}</div>
+                  <div className="text-sm text-gray-600">Total Comments</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {lead.comments?.filter(c => c.intent_level === 'hot').length || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Hot Intent</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {lead.comments?.filter(c => c.intent_level === 'warm').length || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Warm Intent</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-600">
+                    {lead.comments?.filter(c => c.intent_level === 'cold').length || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Cold Intent</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Comments Timeline */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="space-y-6">
+                {lead.comments && lead.comments.length > 0 ? (
+                  lead.comments.map((comment, index) => (
+                    <div key={comment.id || index} className="relative">
+                      {/* Timeline Line */}
+                      {index < lead.comments.length - 1 && (
+                        <div className="absolute left-6 top-12 w-0.5 h-16 bg-gray-200"></div>
+                      )}
+                      
+                      <div className="flex items-start space-x-4">
+                        {/* Timeline Dot */}
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          comment.intent_level === 'hot' ? 'bg-orange-100' :
+                          comment.intent_level === 'warm' ? 'bg-purple-100' :
+                          'bg-gray-100'
+                        }`}>
+                          <MessageSquare className={`w-5 h-5 ${
+                            comment.intent_level === 'hot' ? 'text-orange-600' :
+                            comment.intent_level === 'warm' ? 'text-purple-600' :
+                            'text-gray-600'
+                          }`} />
+                        </div>
+                        
+                        {/* Comment Content */}
+                        <div className="flex-1 bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <span className="text-green-600 text-xs font-medium">
+                                  {['TR', 'GC', 'CT', 'FP', 'TV'][Math.floor(Math.random() * 5)]}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {['Tech Reviews', 'Gaming Channel', 'Cooking Tips', 'Fitness Pro', 'Travel Vlogs'][Math.floor(Math.random() * 5)]}
+                                </div>
+                                <div className="text-sm text-gray-500">{comment.timestamp}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                comment.intent_level === 'hot' ? 'bg-orange-100 text-orange-800' :
+                                comment.intent_level === 'warm' ? 'bg-purple-100 text-purple-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {getIntentEmoji(comment.intent_level)} {comment.intent_level}
+                              </span>
+                              {comment.is_subscriber && (
+                                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                  Subscriber
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-800 mb-3 leading-relaxed">{comment.text}</p>
+                          
+                          <div className="flex items-center justify-between text-sm text-gray-500">
+                            <div className="flex items-center space-x-4">
+                              <span className="flex items-center space-x-1">
+                                <Eye className="w-4 h-4" />
+                                <span>{Math.floor(Math.random() * 1000) + 100} views</span>
+                              </span>
+                              <span className="flex items-center space-x-1">
+                                <MessageSquare className="w-4 h-4" />
+                                <span>{Math.floor(Math.random() * 50) + 1} replies</span>
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                                View Video
+                              </button>
+                              <button className="text-gray-600 hover:text-gray-700 text-sm">
+                                Reply
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No comments found</h3>
+                    <p className="text-gray-500">This lead hasn't made any comments yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Other tabs placeholder */}
+        {activeTab === 'details' && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Lead Details</h3>
+            <p className="text-gray-500">Details tab content coming soon...</p>
+          </div>
+        )}
+
+        {activeTab === 'products' && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Product Interests</h3>
+            <p className="text-gray-500">Products tab content coming soon...</p>
+          </div>
+        )}
+
+        {activeTab === 'conversations' && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Conversations</h3>
+            <p className="text-gray-500">Conversations tab content coming soon...</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Leads CRM page component
   const LeadsPage = () => {
-    const allLeads = sortLeads(getAllLeads());
+    let allLeads = getAllLeads();
+    
+    // Apply filters
+    if (filterIntent !== 'all') {
+      allLeads = allLeads.filter(lead => lead.intent_level === filterIntent);
+    }
+    if (filterStatus !== 'all') {
+      allLeads = allLeads.filter(lead => lead.status === filterStatus);
+    }
+    if (filterChannel !== 'all') {
+      allLeads = allLeads.filter(lead => {
+        const channelNames = ['Tech Reviews', 'Gaming Channel', 'Cooking Tips', 'Fitness Pro', 'Travel Vlogs'];
+        const leadChannelIndex = Math.floor(Math.random() * 5); // This is a simplified approach since we're generating random channels
+        return channelNames[leadChannelIndex] === filterChannel;
+      });
+    }
+    if (filterLeadScore !== 'all') {
+      allLeads = allLeads.filter(lead => {
+        const score = lead.engagementScore;
+        switch (filterLeadScore) {
+          case 'high': return score >= 80;
+          case 'medium': return score >= 40 && score < 80;
+          case 'low': return score < 40;
+          default: return true;
+        }
+      });
+    }
+    if (filterDateRange !== 'all') {
+      allLeads = allLeads.filter(lead => {
+        const leadDate = new Date(lead.timestamp);
+        const now = new Date();
+        const diffDays = Math.floor((now - leadDate) / (1000 * 60 * 60 * 24));
+        
+        switch (filterDateRange) {
+          case 'today': return diffDays === 0;
+          case 'week': return diffDays <= 7;
+          case 'month': return diffDays <= 30;
+          case 'quarter': return diffDays <= 90;
+          default: return true;
+        }
+      });
+    }
+    
+    // Apply sorting
+    allLeads = [...allLeads].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.username.localeCompare(b.username);
+        case 'lead_score':
+          return b.engagementScore - a.engagementScore;
+        case 'company':
+          return a.username.localeCompare(b.username); // Using username as proxy for channel
+        case 'date_created':
+        default:
+          return new Date(b.timestamp) - new Date(a.timestamp);
+      }
+    });
+    
+    // If a lead is selected, show the detail page
+    if (selectedLeadDetail) {
+      return (
+        <LeadDetailPage 
+          lead={selectedLeadDetail} 
+          onBack={() => setSelectedLeadDetail(null)}
+        />
+      );
+    }
     
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Leads CRM</h1>
-          <p className="text-gray-600 mt-2">Manage and track your YouTube comment leads</p>
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-6">
+                         <div>
+               <div className="flex items-center space-x-2">
+                 <h1 className="text-2xl font-bold text-green-500">Leads</h1>
+               </div>
+               <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                 <span>{allLeads.length} Total</span>
+                 <div className="relative dropdown-container">
+                   <button 
+                     onClick={() => setShowSortDropdown(!showSortDropdown)}
+                     className="flex items-center space-x-1 hover:text-gray-800"
+                   >
+                     <span>Sort by: {sortBy === 'date_created' ? 'Date Created' : 
+                                     sortBy === 'name' ? 'Name' : 
+                                     sortBy === 'lead_score' ? 'Lead Score' : 
+                                     sortBy === 'company' ? 'Channel' : 'Date Created'}</span>
+                     <ChevronDown className="w-4 h-4" />
+                   </button>
+                   {showSortDropdown && (
+                     <div className="absolute top-8 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-48">
+                       <div className="py-1">
+                         <button 
+                           onClick={() => { setSortBy('date_created'); setShowSortDropdown(false); }}
+                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                         >
+                           Date Created
+                         </button>
+                         <button 
+                           onClick={() => { setSortBy('name'); setShowSortDropdown(false); }}
+                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                         >
+                           Name
+                         </button>
+                         <button 
+                           onClick={() => { setSortBy('lead_score'); setShowSortDropdown(false); }}
+                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                         >
+                           Lead Score
+                         </button>
+                         <button 
+                           onClick={() => { setSortBy('company'); setShowSortDropdown(false); }}
+                           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                         >
+                           Channel
+                         </button>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               </div>
+             </div>
+          </div>
+                    <div className="flex items-center space-x-4">
+            <div className="relative dropdown-container">
+               <button 
+                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
+               >
+                 <Filter className="w-4 h-4" />
+                 <span>Filter</span>
+               </button>
+               {showFilterDropdown && (
+                 <div className="absolute top-8 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-64">
+                   <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">Intent Level</label>
+                       <select 
+                         value={filterIntent} 
+                         onChange={(e) => setFilterIntent(e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                       >
+                         <option value="all">All Intent Levels</option>
+                         <option value="hot">Hot</option>
+                         <option value="warm">Warm</option>
+                         <option value="cold">Cold</option>
+                       </select>
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                       <select 
+                         value={filterStatus} 
+                         onChange={(e) => setFilterStatus(e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                       >
+                         <option value="all">All Statuses</option>
+                         <option value="converted">Converted</option>
+                         <option value="contacted">Contacted</option>
+                         <option value="not_contacted">Not Contacted</option>
+                       </select>
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">Channel</label>
+                       <select 
+                         value={filterChannel} 
+                         onChange={(e) => setFilterChannel(e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                       >
+                         <option value="all">All Channels</option>
+                         <option value="Tech Reviews">Tech Reviews</option>
+                         <option value="Gaming Channel">Gaming Channel</option>
+                         <option value="Cooking Tips">Cooking Tips</option>
+                         <option value="Fitness Pro">Fitness Pro</option>
+                         <option value="Travel Vlogs">Travel Vlogs</option>
+                       </select>
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">Lead Score</label>
+                       <select 
+                         value={filterLeadScore} 
+                         onChange={(e) => setFilterLeadScore(e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                       >
+                         <option value="all">All Scores</option>
+                         <option value="high">High (80+)</option>
+                         <option value="medium">Medium (40-79)</option>
+                         <option value="low">Low (0-39)</option>
+                       </select>
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                       <select 
+                         value={filterDateRange} 
+                         onChange={(e) => setFilterDateRange(e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                       >
+                         <option value="all">All Time</option>
+                         <option value="today">Today</option>
+                         <option value="week">Last 7 Days</option>
+                         <option value="month">Last 30 Days</option>
+                         <option value="quarter">Last 90 Days</option>
+                       </select>
+                     </div>
+                     <div className="flex space-x-2 pt-2 border-t border-gray-200">
+                       <button 
+                         onClick={() => { 
+                           setFilterIntent('all'); 
+                           setFilterStatus('all'); 
+                           setFilterChannel('all');
+                           setFilterLeadScore('all');
+                           setFilterDateRange('all');
+                           setShowFilterDropdown(false); 
+                         }}
+                         className="flex-1 px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                       >
+                         Clear All
+                       </button>
+                       <button 
+                         onClick={() => setShowFilterDropdown(false)}
+                         className="flex-1 px-3 py-2 text-sm bg-green-500 text-white rounded-md hover:bg-green-600"
+                       >
+                         Apply
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               )}
+             </div>
+                         <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center space-x-2">
+               <Plus className="w-4 h-4" />
+               <span>Add Lead</span>
+             </button>
+            <button className="w-8 h-8 flex items-center justify-center">
+              <MoreVertical className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
         </div>
 
-        {/* Leads Table */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {/* Table */}
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
           {/* Table Header */}
           <div className="bg-gray-50 border-b border-gray-200">
             <div className="flex items-center px-6 py-4">
-              {columnOrder
-                .map(columnId => leadsColumns.find(col => col.id === columnId))
-                .filter(col => col && col.visible)
-                .map((column, index) => (
-                <div 
-                  key={column.id} 
-                  className={`flex items-center ${column.width} ${index === 0 ? 'flex-1' : ''} ${
-                    draggedColumn === column.id ? 'opacity-50' : ''
-                  } ${
-                    dragOverColumn === column.id ? 'border-l-2 border-indigo-500 bg-indigo-50' : ''
-                  }`}
-                >
-                  <div 
-                    className="flex items-center space-x-2 w-full cursor-move"
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, column.id)}
-                    onDragOver={(e) => handleDragOver(e, column.id)}
-                    onDrop={(e) => handleDrop(e, column.id)}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <GripVertical className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700">{column.label}</span>
-                    {column.sortable && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleColumnSort(column.id);
-                        }}
-                        className="text-gray-400 hover:text-gray-600"
-                      >
-                        {leadsSortBy.field === column.id ? (
-                          leadsSortBy.direction === 'asc' ? (
-                            <ArrowUp className="w-4 h-4" />
-                          ) : (
-                            <ArrowDown className="w-4 h-4" />
-                          )
-                        ) : (
-                          <ArrowUpDown className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <div className="w-20 flex justify-end">
-                <button className="text-gray-400 hover:text-gray-600">
-                  <MoreHorizontal className="w-4 h-4" />
+              <div className="w-8 mr-4"></div>
+              <div className="flex-1">
+                <span className="text-sm font-medium text-gray-700">USERNAME</span>
+              </div>
+              <div className="w-32">
+                <span className="text-sm font-medium text-gray-700">CHANNEL</span>
+              </div>
+              <div className="w-32">
+                <span className="text-sm font-medium text-gray-700">LEAD SCORE</span>
+              </div>
+              <div className="w-32">
+                <span className="text-sm font-medium text-gray-700">PHONE</span>
+              </div>
+              <div className="w-40">
+                <span className="text-sm font-medium text-gray-700">TAGS</span>
+              </div>
+              <div className="w-32">
+                <span className="text-sm font-medium text-gray-700">CREATED DATE</span>
+              </div>
+              <div className="w-8 flex justify-center">
+                <button className="w-8 h-8 flex items-center justify-center">
+                  <MoreVertical className="w-4 h-4 text-gray-600" />
                 </button>
               </div>
             </div>
@@ -680,102 +1390,73 @@ const App = () => {
           {/* Table Body */}
           <div className="divide-y divide-gray-200">
             {allLeads.map((lead, index) => (
-              <div key={lead.id} className="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors">
-                {columnOrder
-                  .map(columnId => leadsColumns.find(col => col.id === columnId))
-                  .filter(col => col && col.visible)
-                  .map((column, colIndex) => (
-                  <div key={column.id} className={`${column.width} ${colIndex === 0 ? 'flex-1' : ''}`}>
-                    {column.id === 'username' && (
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">
-                            {lead.username.charAt(1).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="font-medium text-gray-900">{lead.username}</span>
-                        {lead.is_subscriber && (
-                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                            Subscriber
-                          </span>
-                        )}
+              <div 
+                key={lead.id} 
+                className="flex items-center px-6 py-4 hover:bg-blue-50 transition-colors cursor-pointer"
+                onClick={() => setSelectedLeadDetail(getLeadDetails(lead.username))}
+              >
+                                 <input type="checkbox" className="w-4 h-4 text-green-500 border-gray-300 rounded mr-4" />
+                
+                {/* Basic Info */}
+                <div className="flex items-center space-x-3 flex-1">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-green-600 text-sm font-medium">
+                          {lead.username.charAt(1).toUpperCase()}
+                        </span>
                       </div>
-                    )}
-                    {column.id === 'intent' && (
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getIntentClass(lead.intent_level)}`}>
-                        {getIntentEmoji(lead.intent_level)} {lead.intent_level}
-                      </span>
-                    )}
-                    {column.id === 'status' && (
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        lead.status === 'converted' ? 'bg-green-100 text-green-800' :
-                        lead.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {lead.status === 'converted' ? 'Converted' :
-                         lead.status === 'contacted' ? 'Contacted' : 'Not Contacted'}
-                      </span>
-                    )}
-                    {column.id === 'purchase_value' && (
-                      <span className="font-medium text-gray-900">
-                        {lead.purchase_value > 0 ? `$${lead.purchase_value}` : '-'}
-                      </span>
-                    )}
-                    {column.id === 'last_comment' && (
-                      <div className="text-sm text-gray-600 truncate max-w-xs" title={lead.last_comment}>
-                        {lead.last_comment}
-                      </div>
-                    )}
-                    {column.id === 'video' && (
-                      <div className="text-sm text-gray-600 truncate max-w-xs" title={getVideoTitle(lead.video_id)}>
-                        {getVideoTitle(lead.video_id)}
-                      </div>
-                    )}
-                    {column.id === 'timestamp' && (
-                      <span className="text-sm text-gray-500">{lead.timestamp}</span>
-                    )}
+                  <div>
+                    <div className="font-medium text-gray-900">{lead.username}</div>
+                    <div className="text-sm text-gray-500">{lead.contactInfo?.email || 'N/A'}</div>
                   </div>
-                ))}
-                <div className="w-20 flex justify-end space-x-2">
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <Mail className="w-4 h-4" />
-                  </button>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <MoreHorizontal className="w-4 h-4" />
+                </div>
+
+                                      {/* Channel */}
+                      <div className="w-32 text-sm text-gray-900">
+                        {['Tech Reviews', 'Gaming Channel', 'Cooking Tips', 'Fitness Pro', 'Travel Vlogs'][Math.floor(Math.random() * 5)]}
+                      </div>
+
+                {/* Lead Score */}
+                <div className="w-32 text-sm font-medium text-gray-900">
+                  {lead.engagementScore}
+                </div>
+
+                {/* Phone */}
+                <div className="w-32 text-sm text-gray-900">
+                  {lead.contactInfo?.phone || 'N/A'}
+                </div>
+
+                                      {/* Tags */}
+                      <div className="w-40">
+                        <div className="flex flex-wrap gap-1">
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                            {['test tag', 'another tag', 'something tag', 'hot lead', 'engaged'][Math.floor(Math.random() * 5)]}
+                          </span>
+                                                     {Math.random() > 0.5 && (
+                             <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                               {['vip', 'prospect', 'qualified', 'new'][Math.floor(Math.random() * 4)]}
+                             </span>
+                           )}
+                          {Math.random() > 0.7 && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                              ...
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                                      {/* Created Date */}
+                      <div className="w-32 text-sm text-gray-500">
+                        {['22 Oct 2016', '16 Oct 2016', '15 Oct 2016', '14 Oct 2016', '13 Oct 2016'][Math.floor(Math.random() * 5)]}
+                      </div>
+
+                {/* Actions */}
+                <div className="w-8 flex justify-center">
+                  <button className="w-8 h-8 flex items-center justify-center">
+                    <MoreVertical className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Column Visibility Controls */}
-        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Column Visibility</h3>
-          <div className="flex flex-wrap gap-2">
-            {leadsColumns.map(column => (
-              <button
-                key={column.id}
-                onClick={() => toggleColumnVisibility(column.id)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                  column.visible 
-                    ? 'bg-indigo-100 text-indigo-700' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                {column.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Debug Info */}
-        <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-yellow-800 mb-2">Debug Info</h3>
-          <div className="text-xs text-yellow-700">
-            <p>Dragged Column: {draggedColumn || 'None'}</p>
-            <p>Drag Over Column: {dragOverColumn || 'None'}</p>
-            <p>Column Order: {columnOrder.map(id => leadsColumns.find(col => col.id === id)?.label).filter(Boolean).join(' → ')}</p>
           </div>
         </div>
       </div>
@@ -1039,7 +1720,7 @@ const App = () => {
                 <Menu className="w-6 h-6" />
               </button>
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
                   <span className="text-white text-lg font-bold">C</span>
                 </div>
                 <h1 className="text-xl font-bold ml-3 text-gray-900">Comvert</h1>
@@ -1055,7 +1736,7 @@ const App = () => {
                   </span>
                 )}
               </div>
-              <button onClick={exportToCSV} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center">
+              <button onClick={exportToCSV} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center">
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </button>
@@ -1067,7 +1748,7 @@ const App = () => {
         </div>
 
         {/* ROI Banner */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 sticky top-16 z-20">
+        <div className="bg-gradient-to-r from-green-500 to-purple-600 text-white p-6 sticky top-16 z-20">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <DollarSign className="w-6 h-6" />
@@ -1096,25 +1777,25 @@ const App = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="card">
             <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Hot Leads Today</p>
-                <p className="text-2xl font-bold text-red-600">{analytics.hot_leads}</p>
-              </div>
+                          <div className="p-2 bg-orange-100 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-orange-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Hot Leads Today</p>
+              <p className="text-2xl font-bold text-orange-600">{analytics.hot_leads}</p>
+            </div>
             </div>
           </div>
           
           <div className="card">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Eye className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Interested</p>
-                <p className="text-2xl font-bold text-yellow-600">{analytics.warm_leads}</p>
-              </div>
+                          <div className="p-2 bg-purple-100 rounded-lg">
+              <Eye className="w-6 h-6 text-purple-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Interested</p>
+              <p className="text-2xl font-bold text-purple-600">{analytics.warm_leads}</p>
+            </div>
             </div>
           </div>
           
@@ -1150,7 +1831,7 @@ const App = () => {
               <button
                 onClick={() => setFilter('all')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === 'all' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 Show All
@@ -1158,7 +1839,7 @@ const App = () => {
               <button
                 onClick={() => setFilter('hot')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === 'hot' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === 'hot' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 🔥 Hot Leads Only
@@ -1166,7 +1847,7 @@ const App = () => {
               <button
                 onClick={() => setFilter('warm')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === 'warm' ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === 'warm' ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 🤔 Warm Leads
@@ -1188,7 +1869,7 @@ const App = () => {
                 placeholder="Search comments or usernames..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-64"
               />
             </div>
           </div>

@@ -14,7 +14,7 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
+    @apply bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
   }
   
   .btn-secondary {
@@ -22,11 +22,11 @@
   }
   
   .intent-hot {
-    @apply bg-red-100 text-red-800 border-red-200;
+    @apply bg-orange-100 text-orange-800 border-orange-200;
   }
   
   .intent-warm {
-    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+    @apply bg-purple-100 text-purple-800 border-purple-200;
   }
   
   .intent-cold {
