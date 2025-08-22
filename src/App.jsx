@@ -19,7 +19,19 @@ import {
   BarChart3,
   Settings,
   Bell,
-  LogOut
+  LogOut,
+  Home,
+  CreditCard,
+  Zap,
+  Menu,
+  X,
+  ChevronRight,
+  Edit,
+  Camera,
+  Shield,
+  Globe,
+  Palette,
+  Volume2
 } from 'lucide-react';
 
 const App = () => {
@@ -36,6 +48,8 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showLeadDetails, setShowLeadDetails] = useState(false);
   const [newCommentInterval, setNewCommentInterval] = useState(null);
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Mock data generation
   const generateMockData = () => {
@@ -152,18 +166,18 @@ const App = () => {
     }
   };
 
-  // Initialize data
+    // Initialize data
   useEffect(() => {
-         const savedData = localStorage.getItem('comvertData');
+    const savedData = localStorage.getItem('comvertData');
     if (savedData) {
       const data = JSON.parse(savedData);
       setVideos(data.videos || []);
       setComments(data.comments || []);
       setLeads(data.leads || []);
       setAnalytics(data.analytics || {});
-      setIsYouTubeConnected(data.isYouTubeConnected || false);
-      setIsAuthenticated(data.isAuthenticated || false);
-      setCurrentUser(data.currentUser || null);
+      setIsYouTubeConnected(data.isYouTubeConnected || true);
+      setIsAuthenticated(data.isAuthenticated || true);
+      setCurrentUser(data.currentUser || { id: 1, email: "creator@example.com", name: "TechReviewChannel" });
     } else {
       const { mockVideos, mockComments, mockLeads, mockAnalytics } = generateMockData();
       setVideos(mockVideos);
@@ -378,6 +392,292 @@ const App = () => {
     }
   };
 
+  // Sidebar component
+  const Sidebar = () => (
+    <div className={`bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-40 transition-transform duration-300 ${
+      sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+    } lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center">
+          <Youtube className="w-8 h-8 text-youtube-red" />
+          <h1 className="text-xl font-bold ml-2">Comvert</h1>
+        </div>
+        <button 
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden text-gray-400 hover:text-gray-600"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      
+      <nav className="p-4">
+        <div className="space-y-2">
+          <button
+            onClick={() => setCurrentPage('dashboard')}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              currentPage === 'dashboard' 
+                ? 'bg-youtube-red text-white' 
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Home className="w-4 h-4 mr-3" />
+            Dashboard
+          </button>
+          
+          <button
+            onClick={() => setCurrentPage('settings')}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              currentPage === 'settings' 
+                ? 'bg-youtube-red text-white' 
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Settings className="w-4 h-4 mr-3" />
+            Settings
+          </button>
+        </div>
+        
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <div className="flex items-center px-3 py-2">
+            <div className="w-8 h-8 bg-youtube-red rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-medium">
+                {currentUser?.name?.charAt(0) || 'U'}
+              </span>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-700">{currentUser?.name || 'User'}</p>
+              <p className="text-xs text-gray-500">{currentUser?.email || 'user@example.com'}</p>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  );
+
+  // Settings page component
+  const SettingsPage = () => (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+        <p className="text-gray-600 mt-2">Manage your account, billing, and integrations</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Settings Navigation */}
+        <div className="lg:col-span-1">
+          <div className="card">
+            <nav className="space-y-1">
+              <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                <User className="w-4 h-4 mr-3" />
+                Profile
+              </button>
+              <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                <CreditCard className="w-4 h-4 mr-3" />
+                Billing
+              </button>
+              <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                <Zap className="w-4 h-4 mr-3" />
+                Integrations
+              </button>
+              <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                <Shield className="w-4 h-4 mr-3" />
+                Security
+              </button>
+              <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                <Bell className="w-4 h-4 mr-3" />
+                Notifications
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Settings Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Profile Section */}
+          <div className="card">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Profile</h2>
+              <button className="text-youtube-red hover:text-red-700 text-sm font-medium">
+                <Edit className="w-4 h-4 inline mr-1" />
+                Edit
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="flex items-center space-x-6">
+                <div className="relative">
+                  <div className="w-20 h-20 bg-youtube-red rounded-full flex items-center justify-center">
+                    <span className="text-white text-xl font-medium">
+                      {currentUser?.name?.charAt(0) || 'U'}
+                    </span>
+                  </div>
+                  <button className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-md">
+                    <Camera className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">{currentUser?.name || 'User Name'}</h3>
+                  <p className="text-gray-500">{currentUser?.email || 'user@example.com'}</p>
+                  <p className="text-sm text-gray-400">Member since January 2024</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    defaultValue={currentUser?.name || 'User Name'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    defaultValue={currentUser?.email || 'user@example.com'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                  <input
+                    type="text"
+                    defaultValue="TechReviewChannel"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                  <input
+                    type="url"
+                    defaultValue="https://youtube.com/@TechReviewChannel"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Billing Section */}
+          <div className="card">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Billing</h2>
+            
+            <div className="space-y-6">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <h3 className="font-medium text-gray-900">Starter Plan</h3>
+                  <p className="text-sm text-gray-500">$29/month • 1,000 leads, unlimited videos</p>
+                </div>
+                <button className="btn-secondary text-sm">
+                  Change Plan
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Payment Method</h4>
+                  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                    <CreditCard className="w-6 h-6 text-gray-400" />
+                    <div>
+                      <p className="text-sm font-medium">•••• •••• •••• 4242</p>
+                      <p className="text-xs text-gray-500">Expires 12/25</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Billing History</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>January 2024</span>
+                      <span className="font-medium">$29.00</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>December 2023</span>
+                      <span className="font-medium">$29.00</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Integrations Section */}
+          <div className="card">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Integrations</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Youtube className="w-8 h-8 text-youtube-red" />
+                  <div>
+                    <h3 className="font-medium text-gray-900">YouTube</h3>
+                    <p className="text-sm text-gray-500">Connected to TechReviewChannel</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                    Connected
+                  </span>
+                  <button className="text-gray-400 hover:text-gray-600">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-purple-500 rounded flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">IG</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Instagram</h3>
+                    <p className="text-sm text-gray-500">Coming soon</p>
+                  </div>
+                </div>
+                <button className="text-gray-400" disabled>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-black rounded flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">TT</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">TikTok</h3>
+                    <p className="text-sm text-gray-500">Coming soon</p>
+                  </div>
+                </div>
+                <button className="text-gray-400" disabled>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">FB</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Facebook</h3>
+                    <p className="text-sm text-gray-500">Coming soon</p>
+                  </div>
+                </div>
+                <button className="text-gray-400" disabled>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // Authentication component
   if (!isAuthenticated) {
     return (
@@ -391,11 +691,12 @@ const App = () => {
             <p className="text-gray-600">Convert YouTube comments into sales</p>
           </div>
           
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            setIsAuthenticated(true);
-            setCurrentUser({ id: 1, email: "creator@example.com", name: "TechReviewChannel" });
-          }}>
+                     <form onSubmit={(e) => {
+             e.preventDefault();
+             setIsAuthenticated(true);
+             setIsYouTubeConnected(true);
+             setCurrentUser({ id: 1, email: "creator@example.com", name: "TechReviewChannel" });
+           }}>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -454,69 +755,57 @@ const App = () => {
     );
   }
 
-  // Main dashboard
+    // Main dashboard
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ROI Banner */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <DollarSign className="w-6 h-6" />
-            <div>
-              <div className="text-lg font-bold">
-                💰 Month to Date: ${analytics.total_revenue?.toLocaleString()} from YouTube comments
-              </div>
-              <div className="text-sm opacity-90">
-                ROI: {analytics.roi_percentage?.toFixed(0)}x your subscription cost
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar />
+      
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex items-center">
+              <Youtube className="w-6 h-6 text-youtube-red" />
+              <h1 className="text-lg font-bold ml-2">Comvert</h1>
+            </div>
+            <div className="w-6"></div>
+          </div>
+        </div>
+
+        {/* ROI Banner */}
+        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <DollarSign className="w-6 h-6" />
+              <div>
+                <div className="text-lg font-bold">
+                  💰 Month to Date: ${analytics.total_revenue?.toLocaleString()} from YouTube comments
+                </div>
+                <div className="text-sm opacity-90">
+                  ROI: {analytics.roi_percentage?.toFixed(0)}x your subscription cost
+                </div>
               </div>
             </div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm opacity-90">Subscription: $29/mo</div>
-            <div className="text-sm font-semibold">
-              Profit: ${(analytics.total_revenue - analytics.subscription_cost)?.toLocaleString()}
+            <div className="text-right">
+              <div className="text-sm opacity-90">Subscription: $29/mo</div>
+              <div className="text-sm font-semibold">
+                Profit: ${(analytics.total_revenue - analytics.subscription_cost)?.toLocaleString()}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                                 <Youtube className="w-8 h-8 text-youtube-red" />
-                 <h1 className="text-xl font-bold ml-2">Comvert</h1>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <span>Connected to:</span>
-                <span className="font-medium">{currentUser?.name}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Bell className="w-5 h-5 text-gray-400" />
-                {analytics.hot_leads > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {analytics.hot_leads}
-                  </span>
-                )}
-              </div>
-              <button onClick={exportToCSV} className="btn-secondary flex items-center">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </button>
-              <button className="text-gray-400 hover:text-gray-600">
-                <LogOut className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Content */}
+        {currentPage === 'dashboard' ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="card">
@@ -837,6 +1126,9 @@ const App = () => {
             </div>
           </div>
         </div>
+      ) : (
+        <SettingsPage />
+      )}
       </div>
     </div>
   );
