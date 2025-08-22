@@ -31,7 +31,13 @@ import {
   Shield,
   Globe,
   Palette,
-  Volume2
+  Volume2,
+  Users,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
+  MoreHorizontal
 } from 'lucide-react';
 
 const App = () => {
@@ -50,6 +56,19 @@ const App = () => {
   const [newCommentInterval, setNewCommentInterval] = useState(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [leadsColumns, setLeadsColumns] = useState([
+    { id: 'username', label: 'Username', sortable: true, visible: true, width: 'w-32' },
+    { id: 'intent', label: 'Intent', sortable: true, visible: true, width: 'w-24' },
+    { id: 'status', label: 'Status', sortable: true, visible: true, width: 'w-24' },
+    { id: 'purchase_value', label: 'Revenue', sortable: true, visible: true, width: 'w-24' },
+    { id: 'last_comment', label: 'Last Comment', sortable: false, visible: true, width: 'w-48' },
+    { id: 'video', label: 'Video', sortable: true, visible: true, width: 'w-40' },
+    { id: 'timestamp', label: 'Date', sortable: true, visible: true, width: 'w-32' }
+  ]);
+  const [leadsSortBy, setLeadsSortBy] = useState({ field: 'timestamp', direction: 'desc' });
+  const [draggedColumn, setDraggedColumn] = useState(null);
+  const [dragOverColumn, setDragOverColumn] = useState(null);
+  const [columnOrder, setColumnOrder] = useState(['username', 'intent', 'status', 'purchase_value', 'last_comment', 'video', 'timestamp']);
 
   // Mock data generation
   const generateMockData = () => {
@@ -394,30 +413,30 @@ const App = () => {
 
   // Sidebar component
   const Sidebar = () => (
-    <div className={`bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-40 transition-transform duration-300 ${
-      sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-    } lg:translate-x-0 lg:static lg:inset-0`}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+    <div className="h-full flex flex-col bg-gray-900">
+      <div className="flex items-center justify-between p-6 border-b border-gray-800">
         <div className="flex items-center">
-          <Youtube className="w-8 h-8 text-youtube-red" />
-          <h1 className="text-xl font-bold ml-2">Comvert</h1>
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <span className="text-white text-lg font-bold">C</span>
+          </div>
+          <h1 className="text-xl font-bold ml-3 text-white">Comvert</h1>
         </div>
         <button 
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden text-gray-400 hover:text-gray-600"
+          className="lg:hidden text-gray-400 hover:text-gray-300"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
       
-      <nav className="p-4">
-        <div className="space-y-2">
+      <nav className="p-4 flex-1">
+        <div className="space-y-1">
           <button
             onClick={() => setCurrentPage('dashboard')}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'dashboard' 
-                ? 'bg-youtube-red text-white' 
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <Home className="w-4 h-4 mr-3" />
@@ -425,11 +444,23 @@ const App = () => {
           </button>
           
           <button
+            onClick={() => setCurrentPage('leads')}
+            className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+              currentPage === 'leads' 
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            <Users className="w-4 h-4 mr-3" />
+            Leads
+          </button>
+          
+          <button
             onClick={() => setCurrentPage('settings')}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
               currentPage === 'settings' 
-                ? 'bg-youtube-red text-white' 
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <Settings className="w-4 h-4 mr-3" />
@@ -437,22 +468,319 @@ const App = () => {
           </button>
         </div>
         
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <div className="flex items-center px-3 py-2">
-            <div className="w-8 h-8 bg-youtube-red rounded-full flex items-center justify-center">
+        <div className="mt-8 pt-6 border-t border-gray-800">
+          <div className="flex items-center px-4 py-3">
+            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
                 {currentUser?.name?.charAt(0) || 'U'}
               </span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">{currentUser?.name || 'User'}</p>
-              <p className="text-xs text-gray-500">{currentUser?.email || 'user@example.com'}</p>
+              <p className="text-sm font-medium text-white">{currentUser?.name || 'User'}</p>
+              <p className="text-xs text-gray-400">{currentUser?.email || 'user@example.com'}</p>
             </div>
           </div>
         </div>
       </nav>
     </div>
   );
+
+  // Sort leads function
+  const sortLeads = (leads) => {
+    return [...leads].sort((a, b) => {
+      const { field, direction } = leadsSortBy;
+      let aValue, bValue;
+      
+      switch (field) {
+        case 'username':
+          aValue = a.username;
+          bValue = b.username;
+          break;
+        case 'intent':
+          aValue = a.intent_level || 'cold';
+          bValue = b.intent_level || 'cold';
+          break;
+        case 'status':
+          aValue = a.status || 'not_contacted';
+          bValue = b.status || 'not_contacted';
+          break;
+        case 'purchase_value':
+          aValue = a.purchase_value || 0;
+          bValue = b.purchase_value || 0;
+          break;
+        case 'video':
+          aValue = getVideoTitle(a.video_id);
+          bValue = getVideoTitle(b.video_id);
+          break;
+        case 'timestamp':
+          aValue = new Date(a.timestamp || '2024-01-01');
+          bValue = new Date(b.timestamp || '2024-01-01');
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  // Handle column sort
+  const handleColumnSort = (field) => {
+    setLeadsSortBy(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  // Handle column reorder with drag and drop
+  const handleDragStart = (e, columnId) => {
+    console.log('Drag start:', columnId);
+    setDraggedColumn(columnId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', columnId);
+  };
+
+  const handleDragOver = (e, columnId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedColumn && draggedColumn !== columnId) {
+      setDragOverColumn(columnId);
+    }
+  };
+
+  const handleDrop = (e, targetColumnId) => {
+    e.preventDefault();
+    console.log('Drop:', draggedColumn, 'onto', targetColumnId);
+    
+    if (draggedColumn && draggedColumn !== targetColumnId) {
+      setColumnOrder(prev => {
+        const newOrder = [...prev];
+        const draggedIndex = newOrder.indexOf(draggedColumn);
+        const targetIndex = newOrder.indexOf(targetColumnId);
+        
+        if (draggedIndex === -1 || targetIndex === -1) return prev;
+        
+        newOrder.splice(draggedIndex, 1);
+        newOrder.splice(targetIndex, 0, draggedColumn);
+        
+        console.log('New order:', newOrder);
+        return newOrder;
+      });
+    }
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+  };
+
+  const handleDragEnd = () => {
+    console.log('Drag end');
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+  };
+
+  const toggleColumnVisibility = (columnId) => {
+    setLeadsColumns(prev => prev.map(col => 
+      col.id === columnId ? { ...col, visible: !col.visible } : col
+    ));
+  };
+
+  // Get all unique leads from comments
+  const getAllLeads = () => {
+    const leadMap = new Map();
+    
+    comments.forEach(comment => {
+      if (!leadMap.has(comment.username)) {
+        const lead = leads.find(l => l.username === comment.username);
+        leadMap.set(comment.username, {
+          id: comment.username,
+          username: comment.username,
+          intent_level: comment.intent_level,
+          status: lead?.status || 'not_contacted',
+          purchase_value: lead?.purchase_value || 0,
+          last_comment: comment.text,
+          video_id: comment.video_id,
+          timestamp: comment.timestamp,
+          is_subscriber: comment.is_subscriber
+        });
+      }
+    });
+    
+    return Array.from(leadMap.values());
+  };
+
+  // Leads CRM page component
+  const LeadsPage = () => {
+    const allLeads = sortLeads(getAllLeads());
+    
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Leads CRM</h1>
+          <p className="text-gray-600 mt-2">Manage and track your YouTube comment leads</p>
+        </div>
+
+        {/* Leads Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          {/* Table Header */}
+          <div className="bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center px-6 py-4">
+              {columnOrder
+                .map(columnId => leadsColumns.find(col => col.id === columnId))
+                .filter(col => col && col.visible)
+                .map((column, index) => (
+                <div 
+                  key={column.id} 
+                  className={`flex items-center ${column.width} ${index === 0 ? 'flex-1' : ''} ${
+                    draggedColumn === column.id ? 'opacity-50' : ''
+                  } ${
+                    dragOverColumn === column.id ? 'border-l-2 border-indigo-500 bg-indigo-50' : ''
+                  }`}
+                >
+                  <div 
+                    className="flex items-center space-x-2 w-full cursor-move"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, column.id)}
+                    onDragOver={(e) => handleDragOver(e, column.id)}
+                    onDrop={(e) => handleDrop(e, column.id)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <GripVertical className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm font-medium text-gray-700">{column.label}</span>
+                    {column.sortable && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleColumnSort(column.id);
+                        }}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        {leadsSortBy.field === column.id ? (
+                          leadsSortBy.direction === 'asc' ? (
+                            <ArrowUp className="w-4 h-4" />
+                          ) : (
+                            <ArrowDown className="w-4 h-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-4 h-4" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div className="w-20 flex justify-end">
+                <button className="text-gray-400 hover:text-gray-600">
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Table Body */}
+          <div className="divide-y divide-gray-200">
+            {allLeads.map((lead, index) => (
+              <div key={lead.id} className="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors">
+                {columnOrder
+                  .map(columnId => leadsColumns.find(col => col.id === columnId))
+                  .filter(col => col && col.visible)
+                  .map((column, colIndex) => (
+                  <div key={column.id} className={`${column.width} ${colIndex === 0 ? 'flex-1' : ''}`}>
+                    {column.id === 'username' && (
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-medium">
+                            {lead.username.charAt(1).toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="font-medium text-gray-900">{lead.username}</span>
+                        {lead.is_subscriber && (
+                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                            Subscriber
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {column.id === 'intent' && (
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getIntentClass(lead.intent_level)}`}>
+                        {getIntentEmoji(lead.intent_level)} {lead.intent_level}
+                      </span>
+                    )}
+                    {column.id === 'status' && (
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        lead.status === 'converted' ? 'bg-green-100 text-green-800' :
+                        lead.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {lead.status === 'converted' ? 'Converted' :
+                         lead.status === 'contacted' ? 'Contacted' : 'Not Contacted'}
+                      </span>
+                    )}
+                    {column.id === 'purchase_value' && (
+                      <span className="font-medium text-gray-900">
+                        {lead.purchase_value > 0 ? `$${lead.purchase_value}` : '-'}
+                      </span>
+                    )}
+                    {column.id === 'last_comment' && (
+                      <div className="text-sm text-gray-600 truncate max-w-xs" title={lead.last_comment}>
+                        {lead.last_comment}
+                      </div>
+                    )}
+                    {column.id === 'video' && (
+                      <div className="text-sm text-gray-600 truncate max-w-xs" title={getVideoTitle(lead.video_id)}>
+                        {getVideoTitle(lead.video_id)}
+                      </div>
+                    )}
+                    {column.id === 'timestamp' && (
+                      <span className="text-sm text-gray-500">{lead.timestamp}</span>
+                    )}
+                  </div>
+                ))}
+                <div className="w-20 flex justify-end space-x-2">
+                  <button className="text-gray-400 hover:text-gray-600">
+                    <Mail className="w-4 h-4" />
+                  </button>
+                  <button className="text-gray-400 hover:text-gray-600">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Column Visibility Controls */}
+        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Column Visibility</h3>
+          <div className="flex flex-wrap gap-2">
+            {leadsColumns.map(column => (
+              <button
+                key={column.id}
+                onClick={() => toggleColumnVisibility(column.id)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  column.visible 
+                    ? 'bg-indigo-100 text-indigo-700' 
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                {column.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Debug Info */}
+        <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-yellow-800 mb-2">Debug Info</h3>
+          <div className="text-xs text-yellow-700">
+            <p>Dragged Column: {draggedColumn || 'None'}</p>
+            <p>Drag Over Column: {dragOverColumn || 'None'}</p>
+            <p>Column Order: {columnOrder.map(id => leadsColumns.find(col => col.id === id)?.label).filter(Boolean).join(' → ')}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Settings page component
   const SettingsPage = () => (
@@ -678,110 +1006,68 @@ const App = () => {
     </div>
   );
 
-  // Authentication component
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="card max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-                             <Youtube className="w-12 h-12 text-youtube-red" />
-               <h1 className="text-3xl font-bold ml-3">Comvert</h1>
-            </div>
-            <p className="text-gray-600">Convert YouTube comments into sales</p>
-          </div>
-          
-                     <form onSubmit={(e) => {
-             e.preventDefault();
-             setIsAuthenticated(true);
-             setIsYouTubeConnected(true);
-             setCurrentUser({ id: 1, email: "creator@example.com", name: "TechReviewChannel" });
-           }}>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-              <button type="submit" className="btn-primary w-full">
-                Sign In
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
-  // YouTube connection component
-  if (!isYouTubeConnected) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="card max-w-md w-full">
-          <div className="text-center mb-8">
-            <Youtube className="w-16 h-16 text-youtube-red mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Connect Your YouTube Channel</h1>
-            <p className="text-gray-600">Start capturing comments and converting them to sales</p>
-          </div>
-          
-          <div className="space-y-4">
-            <button 
-              onClick={() => setIsYouTubeConnected(true)}
-              className="btn-primary w-full flex items-center justify-center"
-            >
-              <Youtube className="w-5 h-5 mr-2" />
-              Connect YouTube Channel
-            </button>
-            
-            <div className="text-center text-sm text-gray-500">
-              <p>Instagram, TikTok, Facebook - Coming Soon!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
     // Main dashboard
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <Sidebar />
+      <div className="hidden lg:block w-64 bg-gray-900">
+        <Sidebar />
+      </div>
+      
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)}></div>
+          <div className="absolute left-0 top-0 h-full w-64 bg-gray-900">
+            <Sidebar />
+          </div>
+        </div>
+      )}
       
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
-        {/* Mobile Header */}
-        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+      <div className="flex-1">
+        {/* Top Bar */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-30">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-            <div className="flex items-center">
-              <Youtube className="w-6 h-6 text-youtube-red" />
-              <h1 className="text-lg font-bold ml-2">Comvert</h1>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden text-gray-400 hover:text-gray-600"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg font-bold">C</span>
+                </div>
+                <h1 className="text-xl font-bold ml-3 text-gray-900">Comvert</h1>
+              </div>
             </div>
-            <div className="w-6"></div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Bell className="w-5 h-5 text-gray-400" />
+                {analytics.hot_leads > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {analytics.hot_leads}
+                  </span>
+                )}
+              </div>
+              <button onClick={exportToCSV} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </button>
+              <button className="text-gray-400 hover:text-gray-600">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* ROI Banner */}
-        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 sticky top-0 z-30">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 sticky top-16 z-20">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <DollarSign className="w-6 h-6" />
@@ -805,7 +1091,7 @@ const App = () => {
 
         {/* Page Content */}
         {currentPage === 'dashboard' ? (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-6 py-8 bg-gray-50">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="card">
@@ -858,37 +1144,37 @@ const App = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="card mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex flex-wrap items-center space-x-2">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  filter === 'all' ? 'bg-youtube-red text-white' : 'bg-gray-200 text-gray-700'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 Show All
               </button>
               <button
                 onClick={() => setFilter('hot')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  filter === 'hot' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === 'hot' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 🔥 Hot Leads Only
               </button>
               <button
                 onClick={() => setFilter('warm')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  filter === 'warm' ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === 'warm' ? 'bg-yellow-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 🤔 Warm Leads
               </button>
               <button
                 onClick={() => setFilter('cold')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  filter === 'cold' ? 'bg-gray-500 text-white' : 'bg-gray-200 text-gray-700'
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === 'cold' ? 'bg-gray-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 💬 All Comments
@@ -902,7 +1188,7 @@ const App = () => {
                 placeholder="Search comments or usernames..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-youtube-red w-full sm:w-64"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64"
               />
             </div>
           </div>
@@ -912,8 +1198,8 @@ const App = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Comments List */}
           <div className="lg:col-span-2">
-            <div className="card">
-              <h2 className="text-lg font-semibold mb-4">YouTube Comments</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold mb-6 text-gray-900">YouTube Comments</h2>
               
               <div className="space-y-4">
                 {filteredComments.map(comment => {
@@ -991,7 +1277,7 @@ const App = () => {
           {/* Lead Details Sidebar */}
           <div className="lg:col-span-1">
             {showLeadDetails && selectedLead ? (
-              <div className="card sticky top-24">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Lead Details</h3>
                   <button 
@@ -1080,7 +1366,7 @@ const App = () => {
                 </div>
               </div>
             ) : (
-              <div className="card text-center text-gray-500">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center text-gray-500">
                 <User className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p>Click on a username to view lead details</p>
               </div>
@@ -1090,8 +1376,8 @@ const App = () => {
 
         {/* Analytics Section */}
         <div className="mt-8">
-          <div className="card">
-            <h2 className="text-lg font-semibold mb-4">Revenue Analytics</h2>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-6 text-gray-900">Revenue Analytics</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
@@ -1126,9 +1412,12 @@ const App = () => {
             </div>
           </div>
         </div>
-      ) : (
-        <SettingsPage />
-      )}
+          </div>
+        ) : currentPage === 'leads' ? (
+          <LeadsPage />
+        ) : (
+          <SettingsPage />
+        )}
       </div>
     </div>
   );
