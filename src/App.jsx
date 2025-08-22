@@ -693,8 +693,119 @@ const App = () => {
 
   // Lead Detail Page component
   const LeadDetailPage = ({ lead, onBack }) => {
-    const [activeTab, setActiveTab] = useState('summary');
+    const [activeTab, setActiveTab] = useState('details'); // Start on details tab
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedLead, setEditedLead] = useState(null);
+    
     if (!lead) return null;
+
+    // Initialize edited lead data when component mounts or lead changes
+    useEffect(() => {
+      if (lead) {
+        setEditedLead({
+          ...lead,
+          contactInfo: {
+            ...lead.contactInfo,
+            firstName: lead.contactInfo?.firstName || '',
+            lastName: lead.contactInfo?.lastName || '',
+            email: lead.contactInfo?.email || '',
+            phone: lead.contactInfo?.phone || '',
+            location: lead.contactInfo?.location || '',
+            timezone: lead.contactInfo?.timezone || '',
+            language: lead.contactInfo?.language || 'English',
+            dateOfBirth: lead.contactInfo?.dateOfBirth || ''
+          },
+          tags: [...(lead.tags || [])],
+          notes: lead.notes || ''
+        });
+      }
+    }, [lead]);
+
+    const handleSave = () => {
+      if (!editedLead) return;
+      
+      console.log('Saving lead:', editedLead);
+      
+      // Update the lead in the main leads array
+      const updatedLeads = leads.map(l => 
+        l.username === lead.username ? editedLead : l
+      );
+      setLeads(updatedLeads);
+      
+      // Save to localStorage
+      localStorage.setItem('leads', JSON.stringify(updatedLeads));
+      
+      // Update analytics if needed
+      const updatedAnalytics = { ...analytics };
+      if (editedLead.contactInfo?.email !== lead.contactInfo?.email) {
+        // Update any analytics that depend on email
+      }
+      setAnalytics(updatedAnalytics);
+      
+      setIsEditing(false);
+      
+      // Force a re-render by updating the selectedLeadDetail
+      setSelectedLeadDetail(editedLead);
+      
+      console.log('Save completed, staying on details tab');
+    };
+
+    const handleCancel = () => {
+      // Reset to original data
+      if (lead) {
+        setEditedLead({
+          ...lead,
+          contactInfo: {
+            ...lead.contactInfo,
+            firstName: lead.contactInfo?.firstName || '',
+            lastName: lead.contactInfo?.lastName || '',
+            email: lead.contactInfo?.email || '',
+            phone: lead.contactInfo?.phone || '',
+            location: lead.contactInfo?.location || '',
+            timezone: lead.contactInfo?.timezone || '',
+            language: lead.contactInfo?.language || 'English',
+            dateOfBirth: lead.contactInfo?.dateOfBirth || ''
+          },
+          tags: [...(lead.tags || [])],
+          notes: lead.notes || ''
+        });
+      }
+      setIsEditing(false);
+    };
+
+    const handleInputChange = (field, value) => {
+      setEditedLead(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    };
+
+    const handleContactInfoChange = (field, value) => {
+      setEditedLead(prev => ({
+        ...prev,
+        contactInfo: {
+          ...prev.contactInfo,
+          [field]: value
+        }
+      }));
+    };
+
+    const handleAddTag = () => {
+      const newTag = prompt('Enter new tag:');
+      if (newTag && newTag.trim()) {
+        setEditedLead(prev => ({
+          ...prev,
+          tags: [...(prev.tags || []), newTag.trim()]
+        }));
+      }
+    };
+
+    const handleRemoveTag = (tagToRemove) => {
+      setEditedLead(prev => ({
+        ...prev,
+        tags: prev.tags.filter(tag => tag !== tagToRemove)
+      }));
+    };
 
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -1089,11 +1200,407 @@ const App = () => {
           </div>
         )}
 
-        {/* Other tabs placeholder */}
+        {/* Details Tab */}
         {activeTab === 'details' && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Lead Details</h3>
-            <p className="text-gray-500">Details tab content coming soon...</p>
+          <div className="space-y-6">
+            {/* Contact Information Card */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Contact Information</h3>
+                  <p className="text-sm text-gray-600">Primary contact details for {editedLead?.username || lead.username}</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  {!isEditing ? (
+                    <>
+                      <button 
+                        onClick={() => setIsEditing(true)}
+                        className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200"
+                      >
+                        Edit
+                      </button>
+                      <button className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600">
+                        Export Contact
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button 
+                        onClick={handleCancel}
+                        className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={handleSave}
+                        className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600"
+                      >
+                        Save Changes
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900 border-b border-gray-200 pb-2">Personal Information</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editedLead?.contactInfo?.firstName || ''}
+                          onChange={(e) => handleContactInfoChange('firstName', e.target.value)}
+                          className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Enter first name"
+                        />
+                      ) : (
+                        <div 
+                          className="text-gray-900 bg-gray-50 px-3 py-2 rounded border cursor-pointer hover:bg-gray-100 transition-colors"
+                          onDoubleClick={() => setIsEditing(true)}
+                        >
+                          {editedLead?.contactInfo?.firstName || 'N/A'}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editedLead?.contactInfo?.lastName || ''}
+                          onChange={(e) => handleContactInfoChange('lastName', e.target.value)}
+                          className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Enter last name"
+                        />
+                      ) : (
+                        <div 
+                          className="text-gray-900 bg-gray-50 px-3 py-2 rounded border cursor-pointer hover:bg-gray-100 transition-colors"
+                          onDoubleClick={() => setIsEditing(true)}
+                        >
+                          {editedLead?.contactInfo?.lastName || 'N/A'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                    <div className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+                      {editedLead?.username || lead.username}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        value={editedLead?.contactInfo?.email || ''}
+                        onChange={(e) => handleContactInfoChange('email', e.target.value)}
+                        className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter email address"
+                      />
+                                          ) : (
+                        <div 
+                          className="text-gray-900 bg-gray-50 px-3 py-2 rounded border flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
+                          onDoubleClick={() => setIsEditing(true)}
+                        >
+                          <span>{editedLead?.contactInfo?.email || 'N/A'}</span>
+                          {editedLead?.contactInfo?.email && (
+                            <button className="text-green-600 hover:text-green-700 text-sm">
+                              Send Email
+                            </button>
+                          )}
+                        </div>
+                      )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        value={editedLead?.contactInfo?.phone || ''}
+                        onChange={(e) => handleContactInfoChange('phone', e.target.value)}
+                        className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter phone number"
+                      />
+                                          ) : (
+                        <div 
+                          className="text-gray-900 bg-gray-50 px-3 py-2 rounded border flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors"
+                          onDoubleClick={() => setIsEditing(true)}
+                        >
+                          <span>{editedLead?.contactInfo?.phone || 'N/A'}</span>
+                          {editedLead?.contactInfo?.phone && (
+                            <button className="text-green-600 hover:text-green-700 text-sm">
+                              Call
+                            </button>
+                          )}
+                        </div>
+                      )}
+                  </div>
+                </div>
+
+                {/* Location & Demographics */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900 border-b border-gray-200 pb-2">Location & Demographics</h4>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editedLead?.contactInfo?.location || ''}
+                        onChange={(e) => handleContactInfoChange('location', e.target.value)}
+                        className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter location"
+                      />
+                    ) : (
+                      <div 
+                        className="text-gray-900 bg-gray-50 px-3 py-2 rounded border cursor-pointer hover:bg-gray-100 transition-colors"
+                        onDoubleClick={() => setIsEditing(true)}
+                      >
+                        {editedLead?.contactInfo?.location || 'N/A'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                    {isEditing ? (
+                      <select
+                        value={editedLead?.contactInfo?.timezone || ''}
+                        onChange={(e) => handleContactInfoChange('timezone', e.target.value)}
+                        className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      >
+                        <option value="">Select timezone</option>
+                        <option value="America/New_York">Eastern Time (ET)</option>
+                        <option value="America/Chicago">Central Time (CT)</option>
+                        <option value="America/Denver">Mountain Time (MT)</option>
+                        <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                        <option value="Europe/London">London (GMT)</option>
+                        <option value="Europe/Paris">Paris (CET)</option>
+                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                        <option value="Australia/Sydney">Sydney (AEST)</option>
+                      </select>
+                    ) : (
+                      <div 
+                        className="text-gray-900 bg-gray-50 px-3 py-2 rounded border cursor-pointer hover:bg-gray-100 transition-colors"
+                        onDoubleClick={() => setIsEditing(true)}
+                      >
+                        {editedLead?.contactInfo?.timezone || 'N/A'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                    {isEditing ? (
+                      <select
+                        value={editedLead?.contactInfo?.language || 'English'}
+                        onChange={(e) => handleContactInfoChange('language', e.target.value)}
+                        className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      >
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                        <option value="Chinese">Chinese</option>
+                        <option value="Japanese">Japanese</option>
+                      </select>
+                    ) : (
+                      <div 
+                        className="text-gray-900 bg-gray-50 px-3 py-2 rounded border cursor-pointer hover:bg-gray-100 transition-colors"
+                        onDoubleClick={() => setIsEditing(true)}
+                      >
+                        {editedLead?.contactInfo?.language || 'English'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        value={editedLead?.contactInfo?.dateOfBirth || ''}
+                        onChange={(e) => handleContactInfoChange('dateOfBirth', e.target.value)}
+                        className="w-full text-gray-900 bg-white px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <div 
+                        className="text-gray-900 bg-gray-50 px-3 py-2 rounded border cursor-pointer hover:bg-gray-100 transition-colors"
+                        onDoubleClick={() => setIsEditing(true)}
+                      >
+                        {editedLead?.contactInfo?.dateOfBirth || 'N/A'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Lead Information Card */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h4 className="font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">Lead Information</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Lead ID</label>
+                  <div className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+                    {lead.username}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Lead Score</label>
+                  <div className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+                    {lead.leadScore}/100
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <div className="bg-green-100 text-green-800 px-3 py-2 rounded border text-sm font-medium">
+                    Active
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Created</label>
+                  <div className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+                    {lead.createdDate}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Activity</label>
+                  <div className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+                    {lead.lastSeen}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Media & Platform Info */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h4 className="font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">Social Media & Platforms</h4>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                      <span className="text-red-600 text-xs font-medium">YT</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">YouTube</div>
+                      <div className="text-sm text-gray-600">@{lead.username}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                      Connected
+                    </span>
+                    <button className="text-green-600 hover:text-green-700 text-sm">
+                      View Channel
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-xs font-medium">TW</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">Twitter</div>
+                      <div className="text-sm text-gray-600">Not connected</div>
+                    </div>
+                  </div>
+                  <button className="text-gray-600 hover:text-gray-700 text-sm">
+                    Connect
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-xs font-medium">LI</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900">LinkedIn</div>
+                      <div className="text-sm text-gray-600">Not connected</div>
+                    </div>
+                  </div>
+                  <button className="text-gray-600 hover:text-gray-700 text-sm">
+                    Connect
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Tags & Notes */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h4 className="font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">Tags & Notes</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                  <div className="flex flex-wrap gap-2">
+                    {editedLead?.tags && editedLead.tags.length > 0 ? (
+                      editedLead.tags.map((tag, index) => (
+                        <span key={index} className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full flex items-center">
+                          {tag}
+                          {isEditing && (
+                            <button
+                              onClick={() => handleRemoveTag(tag)}
+                              className="ml-1 text-purple-600 hover:text-purple-800"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">No tags added</span>
+                    )}
+                  </div>
+                  {isEditing && (
+                    <button 
+                      onClick={handleAddTag}
+                      className="mt-2 text-green-600 hover:text-green-700 text-sm"
+                    >
+                      + Add Tag
+                    </button>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                  {isEditing ? (
+                    <textarea
+                      value={editedLead?.notes || ''}
+                      onChange={(e) => handleInputChange('notes', e.target.value)}
+                      className="w-full bg-white border border-gray-300 rounded p-3 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Add notes about this lead..."
+                    />
+                  ) : (
+                    <div 
+                      className="bg-gray-50 border rounded p-3 min-h-[100px] cursor-pointer hover:bg-gray-100 transition-colors"
+                      onDoubleClick={() => setIsEditing(true)}
+                    >
+                      {editedLead?.notes || (
+                        <span className="text-gray-500 text-sm">No notes added</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
