@@ -693,9 +693,10 @@ const App = () => {
 
   // Lead Detail Page component
   const LeadDetailPage = ({ lead, onBack }) => {
-    const [activeTab, setActiveTab] = useState('details'); // Start on details tab
+    const [activeTab, setActiveTab] = useState('summary'); // Start on summary tab
     const [isEditing, setIsEditing] = useState(false);
     const [editedLead, setEditedLead] = useState(null);
+    const [justSaved, setJustSaved] = useState(false); // Track if we just saved
     
     if (!lead) return null;
 
@@ -718,8 +719,16 @@ const App = () => {
           tags: [...(lead.tags || [])],
           notes: lead.notes || ''
         });
+        
+        // If we just saved, stay on details tab, otherwise go to summary
+        if (justSaved) {
+          setActiveTab('details');
+          setJustSaved(false); // Reset the flag
+        } else {
+          setActiveTab('summary');
+        }
       }
-    }, [lead]);
+    }, [lead, justSaved]);
 
     const handleSave = () => {
       if (!editedLead) return;
@@ -746,6 +755,9 @@ const App = () => {
       
       // Force a re-render by updating the selectedLeadDetail
       setSelectedLeadDetail(editedLead);
+      
+      // Set flag to stay on details tab after save
+      setJustSaved(true);
       
       console.log('Save completed, staying on details tab');
     };
