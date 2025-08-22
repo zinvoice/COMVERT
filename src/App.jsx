@@ -154,7 +154,7 @@ const App = () => {
 
   // Initialize data
   useEffect(() => {
-    const savedData = localStorage.getItem('commentCashData');
+         const savedData = localStorage.getItem('comvertData');
     if (savedData) {
       const data = JSON.parse(savedData);
       setVideos(data.videos || []);
@@ -187,7 +187,7 @@ const App = () => {
       isAuthenticated,
       currentUser
     };
-    localStorage.setItem('commentCashData', JSON.stringify(data));
+         localStorage.setItem('comvertData', JSON.stringify(data));
   }, [videos, comments, leads, analytics, isYouTubeConnected, isAuthenticated, currentUser]);
 
   // Simulate real-time comments
@@ -329,7 +329,7 @@ const App = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `comment-leads-${new Date().toISOString().split('T')[0]}.csv`;
+         a.download = `comvert-leads-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -385,8 +385,8 @@ const App = () => {
         <div className="card max-w-md w-full">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <Youtube className="w-12 h-12 text-youtube-red" />
-              <h1 className="text-3xl font-bold ml-3">CommentCash</h1>
+                             <Youtube className="w-12 h-12 text-youtube-red" />
+               <h1 className="text-3xl font-bold ml-3">Comvert</h1>
             </div>
             <p className="text-gray-600">Convert YouTube comments into sales</p>
           </div>
@@ -486,8 +486,8 @@ const App = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
-                <Youtube className="w-8 h-8 text-youtube-red" />
-                <h1 className="text-xl font-bold ml-2">CommentCash</h1>
+                                 <Youtube className="w-8 h-8 text-youtube-red" />
+                 <h1 className="text-xl font-bold ml-2">Comvert</h1>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <span>Connected to:</span>
