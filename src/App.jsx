@@ -300,22 +300,44 @@ const App = () => {
 
 
 
+  // Calculate ROI
+  const calculateROI = () => {
+    const subscriptionCost = 29;
+    const totalCommission = leads
+      .filter(lead => lead.status === 'converted')
+      .reduce((sum, lead) => sum + (lead.commission || 0), 0);
+    const roi = Math.round((totalCommission / subscriptionCost) * 100);
+    return { totalCommission, roi };
+  };
+
   // Export to CSV
   const exportToCSV = () => {
-    const csvHeaders = 'Username,Comment,Intent,Commission,Status,Date\n';
-    const csvData = leads.map(lead => {
+    const headers = ['Username', 'Comment', 'Intent', 'Video', 'Commission', 'Status'];
+    const rows = leads.map(lead => {
       const lastComment = lead.comments && lead.comments.length > 0 ? lead.comments[0].text : '';
       const intent = lead.comments && lead.comments.length > 0 ? lead.comments[0].intent_level : 'cold';
-      return `${lead.username},"${lastComment}",${intent},${lead.commission || 0},${lead.status || 'active'},${lead.createdDate || 'N/A'}`;
-    }).join('\n');
+      const video = lead.comments && lead.comments.length > 0 ? getVideoTitle(lead.comments[0].video_id) : 'N/A';
+      return [
+        lead.username,
+        lastComment,
+        intent,
+        video,
+        lead.commission || 0,
+        lead.status || 'pending'
+      ];
+    });
     
-    const csv = csvHeaders + csvData;
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'comvert-leads.csv';
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `comvert-leads-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
   };
 
@@ -754,20 +776,19 @@ const App = () => {
 
   // Purchase functionality
   const markAsPurchased = (leadId) => {
-    const amount = prompt("How much commission did you earn?");
-    if (amount) {
+    const amount = prompt("How much commission did you earn from this sale? $");
+    if (amount && !isNaN(parseFloat(amount))) {
       const commission = parseFloat(amount);
-      if (isNaN(commission) || commission < 0) return;
       
-      // Update lead status
-      const updatedLeads = leads.map(l => 
-        l.id === leadId 
-          ? { ...l, status: 'converted', commission: commission }
-          : l
+      // Update the specific lead
+      const updatedLeads = leads.map(lead => 
+        lead.id === leadId 
+          ? { ...lead, status: 'converted', commission: commission }
+          : lead
       );
       setLeads(updatedLeads);
       
-      // Update ROI banner
+      // Update total revenue
       setAnalytics(prev => ({
         ...prev,
         total_revenue: prev.total_revenue + commission,
@@ -785,6 +806,9 @@ const App = () => {
         isAuthenticated,
         currentUser
       }));
+      
+      // Show success message
+      alert(`Success! Added $${commission} to recovered commissions.`);
     }
   };
 
@@ -1880,7 +1904,11 @@ const App = () => {
             {allLeads.map((lead, index) => (
               <div 
                 key={lead.id} 
-                className="flex items-center px-6 py-4 hover:bg-blue-50 transition-colors cursor-pointer"
+                className={`flex items-center px-6 py-4 transition-colors cursor-pointer ${
+                  lead.status === 'converted' 
+                    ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100' 
+                    : 'hover:bg-blue-50'
+                }`}
                 onClick={() => setSelectedLeadDetail(getLeadDetails(lead.username))}
               >
                                  <input type="checkbox" className="w-4 h-4 text-green-500 border-gray-300 rounded mr-4" />
@@ -1938,8 +1966,21 @@ const App = () => {
                       </div>
 
                 {/* Actions */}
-                <div className="w-8 flex justify-center">
-                  <button className="w-8 h-8 flex items-center justify-center">
+                <div className="w-32 flex items-center space-x-2">
+                  {lead.status !== 'converted' && (
+                    <button 
+                      onClick={() => markAsPurchased(lead.id)}
+                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1"
+                    >
+                      💰 Convert to Sale
+                    </button>
+                  )}
+                  {lead.status === 'converted' && (
+                    <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                      💰 ${lead.commission || 0}
+                    </span>
+                  )}
+                  <button className="w-6 h-6 flex items-center justify-center">
                     <MoreVertical className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
@@ -2242,17 +2283,17 @@ const App = () => {
               <DollarSign className="w-6 h-6" />
               <div>
                 <div className="text-lg font-bold">
-                  💰 Month to Date: ${analytics.total_revenue?.toLocaleString()} from YouTube comments
+                  💰 Month to Date: ${calculateROI().totalCommission.toLocaleString()} from YouTube comments
                 </div>
                 <div className="text-sm opacity-90">
-                  ROI: {analytics.roi_percentage?.toFixed(0)}x your subscription cost
+                  ROI: {calculateROI().roi}% of your subscription cost
                 </div>
               </div>
             </div>
             <div className="text-right">
               <div className="text-sm opacity-90">Subscription: $29/mo</div>
               <div className="text-sm font-semibold">
-                Profit: ${(analytics.total_revenue - analytics.subscription_cost)?.toLocaleString()}
+                Profit: ${(calculateROI().totalCommission - 29).toLocaleString()}
               </div>
             </div>
           </div>
