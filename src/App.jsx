@@ -75,6 +75,9 @@ const App = () => {
   const [filterChannel, setFilterChannel] = useState('all');
   const [filterLeadScore, setFilterLeadScore] = useState('all');
   const [filterDateRange, setFilterDateRange] = useState('all');
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedLeadForPurchase, setSelectedLeadForPurchase] = useState(null);
+  const [purchaseAmount, setPurchaseAmount] = useState('');
   const [leadsColumns, setLeadsColumns] = useState([
     { id: 'username', label: 'Username', sortable: true, visible: true, width: 'w-32' },
     { id: 'intent', label: 'Intent', sortable: true, visible: true, width: 'w-24' },
@@ -179,29 +182,14 @@ const App = () => {
   };
 
   // Intent detection function
-  const detectIntent = (commentText) => {
-    const text = commentText.toLowerCase();
+  const getIntentLevel = (comment) => {
+    const text = comment.toLowerCase();
+    const hotWords = ['buy', 'price', 'link', 'where', 'cost', 'discount', 'purchase', 'order', 'available', 'shipping', 'payment'];
+    const warmWords = ['want', 'need', 'love', '😍', '🔥', 'interested', 'like', 'recommend', 'suggest'];
     
-    // Hot leads
-    const hotKeywords = [
-      'where can i buy', 'price', 'link please', 'how much', 'is this available',
-      'do you ship to', 'what size', 'discount code', 'link in bio', 'link?',
-      'where to buy', 'cost', 'purchase', 'buy now', 'order'
-    ];
-    
-    // Warm leads
-    const warmKeywords = [
-      'love this', 'need this', 'want', 'tutorial please', 'more info',
-      '😍', '🔥', 'amazing', 'perfect', 'exactly what i need'
-    ];
-    
-    if (hotKeywords.some(keyword => text.includes(keyword))) {
-      return 'hot';
-    } else if (warmKeywords.some(keyword => text.includes(keyword))) {
-      return 'warm';
-    } else {
-      return 'cold';
-    }
+    if (hotWords.some(word => text.includes(word))) return 'hot';
+    if (warmWords.some(word => text.includes(word))) return 'warm';
+    return 'cold';
   };
 
     // Initialize data
@@ -291,7 +279,7 @@ const App = () => {
       video_id: randomVideoId,
       username: randomUsername,
       text: randomComment,
-      intent_level: "cold",
+      intent_level: getIntentLevel(randomComment),
       timestamp: "Just now",
       is_subscriber: Math.random() > 0.4
     };
@@ -310,80 +298,25 @@ const App = () => {
     return matchesFilter && matchesSearch;
   });
 
-  // Mark lead as purchased
-  const markAsPurchased = (commentId, amount) => {
-    const comment = comments.find(c => c.id === commentId);
-    if (comment) {
-      const lead = leads.find(l => l.username === comment.username);
-      
-      if (lead) {
-        // Update existing lead
-        setLeads(prev => prev.map(l => 
-          l.id === lead.id 
-            ? { ...l, status: 'converted', purchase_value: amount }
-            : l
-        ));
-      } else {
-        // Create new lead
-        const newLead = {
-          id: Date.now(),
-          username: comment.username,
-          channel_url: `https://youtube.com/${comment.username}`,
-          comments: [comment],
-          tags: [],
-          notes: "",
-          email: "",
-          status: 'converted',
-          purchase_value: amount
-        };
-        setLeads(prev => [...prev, newLead]);
-      }
-      
-      // Update analytics
-      setAnalytics(prev => ({
-        ...prev,
-        total_revenue: prev.total_revenue + amount,
-        total_leads: prev.total_leads + 1,
-        average_order: (prev.total_revenue + amount) / (prev.total_leads + 1),
-        roi_percentage: ((prev.total_revenue + amount) / prev.subscription_cost) * 100
-      }));
-    }
-  };
+
 
   // Export to CSV
   const exportToCSV = () => {
-    const csvData = filteredComments.map(comment => {
-      const lead = leads.find(l => l.username === comment.username);
-      const video = videos.find(v => v.id === comment.video_id);
-      
-      return {
-        'YouTube Username': comment.username,
-        'Channel URL': `https://youtube.com/${comment.username}`,
-        'Comment Text': comment.text,
-        'Video Title': video?.title || 'Unknown',
-        'Intent Level': comment.intent_level,
-        'Timestamp': comment.timestamp,
-        'Is Subscriber': comment.is_subscriber ? 'Yes' : 'No',
-        'Status': lead?.status || 'Not Contacted',
-        'Purchase Value': lead?.purchase_value || '',
-        'Notes': lead?.notes || '',
-        'Tags': lead?.tags?.join(', ') || ''
-      };
-    });
+    const csvHeaders = 'Username,Comment,Intent,Commission,Status,Date\n';
+    const csvData = leads.map(lead => {
+      const lastComment = lead.comments && lead.comments.length > 0 ? lead.comments[0].text : '';
+      const intent = lead.comments && lead.comments.length > 0 ? lead.comments[0].intent_level : 'cold';
+      return `${lead.username},"${lastComment}",${intent},${lead.commission || 0},${lead.status || 'active'},${lead.createdDate || 'N/A'}`;
+    }).join('\n');
     
-    const headers = Object.keys(csvData[0]);
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => headers.map(header => `"${row[header]}"`).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const csv = csvHeaders + csvData;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-         a.download = `comvert-leads-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = 'comvert-leads.csv';
     a.click();
-    window.URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
   };
 
   // Add note to lead
@@ -812,12 +745,48 @@ const App = () => {
       }
     };
 
-    const handleRemoveTag = (tagToRemove) => {
-      setEditedLead(prev => ({
+      const handleRemoveTag = (tagToRemove) => {
+    setEditedLead(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  // Purchase functionality
+  const markAsPurchased = (leadId) => {
+    const amount = prompt("How much commission did you earn?");
+    if (amount) {
+      const commission = parseFloat(amount);
+      if (isNaN(commission) || commission < 0) return;
+      
+      // Update lead status
+      const updatedLeads = leads.map(l => 
+        l.id === leadId 
+          ? { ...l, status: 'converted', commission: commission }
+          : l
+      );
+      setLeads(updatedLeads);
+      
+      // Update ROI banner
+      setAnalytics(prev => ({
         ...prev,
-        tags: prev.tags.filter(tag => tag !== tagToRemove)
+        total_revenue: prev.total_revenue + commission,
+        converted_leads: (prev.converted_leads || 0) + 1
       }));
-    };
+      
+      // Save to localStorage
+      const updatedAnalytics = { ...analytics, total_revenue: analytics.total_revenue + commission };
+      localStorage.setItem('comvertData', JSON.stringify({
+        videos,
+        comments,
+        leads: updatedLeads,
+        analytics: updatedAnalytics,
+        isYouTubeConnected,
+        isAuthenticated,
+        currentUser
+      }));
+    }
+  };
 
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -2444,15 +2413,10 @@ const App = () => {
                         <div className="flex flex-col space-y-2 ml-4">
                           {comment.intent_level === 'hot' && !lead?.status && (
                             <button
-                              onClick={() => {
-                                const amount = prompt('How much did they spend? $');
-                                if (amount && !isNaN(amount)) {
-                                  markAsPurchased(comment.id, parseFloat(amount));
-                                }
-                              }}
+                              onClick={() => markAsPurchased(comment.id)}
                               className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-lg"
                             >
-                              💰 Converted!
+                              💰 Convert to Sale
                             </button>
                           )}
                           

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comvert - Complete Logo Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: #050505;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #00D863 0%, #6B46C1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .section-title {
+            color: white;
+            font-size: 2.5rem;
+            margin: 80px 0 40px 0;
+            text-align: center;
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00D863, transparent);
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+        
+        .logo-card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo-card:hover {
+            transform: translateY(-5px);
+            border-color: #00D863;
+            box-shadow: 0 20px 40px rgba(0, 216, 99, 0.15);
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 140px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .logo-description {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .winner-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #00D863, #00B853);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% { 
+                filter: drop-shadow(0 0 20px rgba(0, 216, 99, 0.5));
+            }
+            50% { 
+                filter: drop-shadow(0 0 40px rgba(0, 216, 99, 0.8));
+            }
+        }
+        
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        .glow-animation {
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+        
+        .final-showcase {
+            background: linear-gradient(135deg, #0a0a0a, #0f0f0f);
+            border: 2px solid #00D863;
+            border-radius: 32px;
+            padding: 80px;
+            margin: 60px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .final-showcase::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 216, 99, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>COMVERT</h1>
+        <p class="subtitle">Complete Logo Collection</p>
+        
+        <!-- FINAL CHOSEN DESIGN -->
+        <div class="final-showcase">
+            <h2 style="color: white; font-size: 2.5rem; margin-bottom: 40px;">✨ Final Design - Holographic Layers</h2>
+            <svg width="200" height="200" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" class="float-animation">
+                <defs>
+                    <linearGradient id="final-grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="final-grad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#6B46C1;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#4A2F8A;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="final-grad3" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#00D863;stop-opacity:0.6" />
+                        <stop offset="50%" style="stop-color:#6B46C1;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:#FF6B35;stop-opacity:0.6" />
+                    </linearGradient>
+                    <filter id="final-glow">
+                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <path d="M50 70 L190 70 Q230 70, 230 110 L230 150 Q230 190, 190 190 L90 190 L60 220 Z" 
+                      fill="url(#final-grad2)" opacity="0.3" filter="url(#final-glow)"/>
+                <path d="M60 80 L180 80 Q220 80, 220 120 L220 140 Q220 180, 180 180 L100 180 L70 210 Z" 
+                      fill="url(#final-grad1)" opacity="0.5" filter="url(#final-glow)"/>
+                <path d="M70 90 L170 90 Q210 90, 210 130 L210 130 Q210 170, 170 170 L110 170 L80 200 Z" 
+                      fill="url(#final-grad3)" opacity="0.7"/>
+                <g filter="url(#final-glow)">
+                    <path d="M130 115 Q150 115, 150 130 Q150 145, 130 145 Q150 145, 150 160 Q150 175, 130 175" 
+                          stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+                    <line x1="140" y1="105" x2="140" y2="185" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                </g>
+            </svg>
+            <p style="color: #888; margin-top: 30px; font-size: 1.1rem;">Your chosen design with brand colors: Electric Green + Deep Purple + Hot Orange accents</p>
+        </div>
+        
+        <!-- MODERN FUTURISTIC DESIGNS -->
+        <h2 class="section-title">Modern Futuristic Concepts</h2>
+        <div class="logo-grid">
+            
+            <!-- Geometric Fusion -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" class="float-animation">
+                        <defs>
+                            <linearGradient id="geo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 40 L90 40 Q110 40, 110 60 L110 70 Q110 90, 90 90 L50 90 L35 105 Z" 
+                              fill="url(#geo-grad)" opacity="0.9"/>
+                        <circle cx="85" cy="65" r="22" fill="none" stroke="white" stroke-width="2.5" opacity="0.9"/>
+                        <text x="85" y="72" font-family="Inter, sans-serif" font-size="20" font-weight="300" fill="white" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Geometric Fusion</div>
+                <div class="logo-description">Clean geometric with overlapping elements</div>
+            </div>
+            
+            <!-- Gradient Mesh -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="mesh1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:0.6" />
+                            </linearGradient>
+                            <linearGradient id="mesh2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#6B46C1;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#00D863;stop-opacity:0.4" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="30" y="40" width="80" height="50" rx="12" fill="url(#mesh1)"/>
+                        <rect x="40" y="35" width="70" height="50" rx="12" fill="url(#mesh2)"/>
+                        <path d="M50 90 L40 105 L55 90" fill="url(#mesh1)"/>
+                        <text x="70" y="68" font-family="Inter, sans-serif" font-size="28" font-weight="200" fill="white" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Gradient Mesh</div>
+                <div class="logo-description">Layered gradients (Stripe style)</div>
+            </div>
+            
+            <!-- Abstract Flow -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" class="glow-animation">
+                        <defs>
+                            <linearGradient id="flow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#00B853;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#6B46C1;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 60 Q30 40, 50 40 L80 40 Q110 40, 110 65 Q110 85, 85 85 L55 85 Q40 85, 35 95 Q30 85, 30 75 Z" 
+                              fill="none" stroke="url(#flow)" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M60 50 Q75 50, 75 60 Q75 70, 60 70 Q75 70, 75 80" 
+                              fill="none" stroke="url(#flow)" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+                        <line x1="67" y1="45" x2="67" y2="50" stroke="url(#flow)" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+                        <line x1="67" y1="80" x2="67" y2="85" stroke="url(#flow)" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="logo-title">Abstract Flow</div>
+                <div class="logo-description">Flowing lines suggest movement</div>
+            </div>
+            
+            <!-- Negative Space -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="neg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <g>
+                            <path d="M25 35 Q25 25, 35 25 L95 25 Q115 25, 115 45 L115 75 Q115 95, 95 95 L45 95 L30 110 L30 95 Q25 95, 25 90 Z" 
+                                  fill="url(#neg)"/>
+                            <path d="M65 45 Q75 45, 75 52 Q75 59, 65 59 Q75 59, 75 66 Q75 73, 65 73 M70 40 L70 45 M70 73 L70 78" 
+                                  stroke="#050505" stroke-width="6" fill="none" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="logo-title">Negative Space</div>
+                <div class="logo-description">$ carved out as negative space</div>
+            </div>
+            
+            <!-- Glassmorphism -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="glass1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:0.4" />
+                            </linearGradient>
+                            <linearGradient id="glass2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:white;stop-opacity:0.5" />
+                                <stop offset="100%" style="stop-color:white;stop-opacity:0.1" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="30" y="40" width="80" height="50" rx="12" fill="url(#glass1)" />
+                        <rect x="30" y="40" width="80" height="25" rx="12" fill="url(#glass2)" opacity="0.4"/>
+                        <rect x="30" y="40" width="80" height="50" rx="12" fill="none" stroke="white" stroke-width="1" opacity="0.3"/>
+                        <path d="M50 90 L40 105 L55 90" fill="url(#glass1)" opacity="0.8"/>
+                        <text x="70" y="72" font-family="Inter, sans-serif" font-size="32" font-weight="100" fill="white" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Glassmorphism 3D</div>
+                <div class="logo-description">Glass-like transparency with depth</div>
+            </div>
+            
+            <!-- Dynamic Lines -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="dyn" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#6B46C1;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 50 L30 45 Q30 35, 40 35 L90 35 Q110 35, 110 55 L110 75 Q110 95, 90 95 L50 95 L35 110 L35 95" 
+                              fill="none" stroke="url(#dyn)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M35 50 L35 45 Q35 40, 45 40 L85 40 Q105 40, 105 60 L105 70 Q105 90, 85 90 L55 90" 
+                              fill="none" stroke="url(#dyn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                        <circle cx="70" cy="65" r="18" fill="none" stroke="url(#dyn)" stroke-width="2" opacity="0.8"/>
+                        <text x="70" y="71" font-family="Inter, sans-serif" font-size="20" font-weight="400" fill="url(#dyn)" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Dynamic Lines</div>
+                <div class="logo-description">Continuous lines create energy</div>
+            </div>
+        </div>
+        
+        <!-- NEXT GENERATION DESIGNS -->
+        <h2 class="section-title">Next Generation Concepts</h2>
+        <div class="logo-grid">
+            
+            <!-- Neon Circuit -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00D863;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="neonglow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <rect x="30" y="40" width="80" height="50" rx="4" fill="none" stroke="url(#neon)" stroke-width="2" filter="url(#neonglow)"/>
+                        <path d="M50 90 L35 105 L50 95 L65 95" stroke="url(#neon)" stroke-width="2" fill="none" stroke-linejoin="miter" filter="url(#neonglow)"/>
+                        <path d="M65 55 Q75 55, 75 62 Q75 69, 65 69 Q75 69, 75 76 Q75 83, 65 83" 
+                              stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <line x1="70" y1="50" x2="70" y2="88" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="30" cy="40" r="3" fill="url(#neon)"/>
+                        <circle cx="110" cy="40" r="3" fill="url(#neon)"/>
+                        <circle cx="110" cy="90" r="3" fill="url(#neon)"/>
+                    </svg>
+                </div>
+                <div class="logo-title">Neon Circuit</div>
+                <div class="logo-description">Tech circuit board aesthetic</div>
+            </div>
+            
+            <!-- Dot Matrix -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" class="pulse-animation">
+                        <defs>
+                            <linearGradient id="dots" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <g fill="url(#dots)">
+                            <circle cx="40" cy="40" r="2" opacity="0.6"/>
+                            <circle cx="50" cy="40" r="2" opacity="0.8"/>
+                            <circle cx="60" cy="40" r="2"/>
+                            <circle cx="70" cy="40" r="2"/>
+                            <circle cx="80" cy="40" r="2"/>
+                            <circle cx="90" cy="40" r="2" opacity="0.8"/>
+                            <circle cx="100" cy="40" r="2" opacity="0.6"/>
+                            <circle cx="30" cy="60" r="2" opacity="0.4"/>
+                            <circle cx="30" cy="70" r="2" opacity="0.4"/>
+                            <circle cx="30" cy="80" r="2" opacity="0.4"/>
+                            <circle cx="110" cy="60" r="2" opacity="0.4"/>
+                            <circle cx="110" cy="70" r="2" opacity="0.4"/>
+                            <circle cx="110" cy="80" r="2" opacity="0.4"/>
+                            <circle cx="40" cy="90" r="2" opacity="0.6"/>
+                            <circle cx="50" cy="90" r="2" opacity="0.8"/>
+                            <circle cx="60" cy="90" r="2"/>
+                            <circle cx="70" cy="90" r="2"/>
+                            <circle cx="80" cy="90" r="2"/>
+                            <circle cx="90" cy="90" r="2" opacity="0.8"/>
+                            <circle cx="100" cy="90" r="2" opacity="0.6"/>
+                            <circle cx="45" cy="100" r="2" opacity="0.6"/>
+                            <circle cx="40" cy="105" r="2" opacity="0.4"/>
+                        </g>
+                        <text x="70" y="72" font-family="Inter, sans-serif" font-size="32" font-weight="700" fill="url(#dots)" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Dot Matrix</div>
+                <div class="logo-description">Minimalist dot pattern</div>
+            </div>
+            
+            <!-- Morphing Gradient -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="morph" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1">
+                                    <animate attributeName="stop-color" values="#00FF88;#00D863;#6B46C1;#00FF88" dur="5s" repeatCount="indefinite"/>
+                                </stop>
+                                <stop offset="100%" style="stop-color:#6B46C1;stop-opacity:1">
+                                    <animate attributeName="stop-color" values="#6B46C1;#00B853;#00FF88;#6B46C1" dur="5s" repeatCount="indefinite"/>
+                                </stop>
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 40 Q30 30, 40 30 L90 30 Q110 30, 110 50 L110 70 Q110 90, 90 90 L50 90 L35 105 L35 90 Q30 90, 30 85 Z" 
+                              fill="url(#morph)" opacity="0.9"/>
+                        <g>
+                            <path d="M65 50 Q78 50, 78 60 Q78 70, 65 70 Q78 70, 78 80 Q78 90, 65 90" 
+                                  stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <line x1="71" y1="45" x2="71" y2="95" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="logo-title">Morphing Gradient</div>
+                <div class="logo-description">Animated color shifts</div>
+            </div>
+            
+            <!-- Isometric 3D -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="iso1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00D863;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="iso2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="iso3" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00B853;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#008840;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M40 35 L100 35 L110 45 L50 45 Z" fill="url(#iso1)"/>
+                        <path d="M40 35 L40 85 L50 95 L50 45 Z" fill="url(#iso2)"/>
+                        <path d="M50 45 L110 45 L110 95 L50 95 Z" fill="url(#iso3)"/>
+                        <path d="M50 95 L35 110 L45 100 L55 100 Z" fill="url(#iso2)"/>
+                        <text x="80" y="75" font-family="Inter, sans-serif" font-size="36" font-weight="800" fill="white" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Isometric 3D</div>
+                <div class="logo-description">3D depth and dimension</div>
+            </div>
+            
+            <!-- Liquid Metal -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="metal">
+                                <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.8" />
+                                <stop offset="50%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00B853;stop-opacity:1" />
+                            </radialGradient>
+                        </defs>
+                        <ellipse cx="70" cy="65" rx="50" ry="35" fill="url(#metal)"/>
+                        <path d="M50 90 Q45 95, 40 105 Q45 95, 55 95" fill="url(#metal)"/>
+                        <text x="70" y="73" font-family="Arial, sans-serif" font-size="34" font-weight="900" fill="white" text-anchor="middle" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3))">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Liquid Metal</div>
+                <div class="logo-description">Mercury-like premium feel</div>
+            </div>
+            
+            <!-- Wireframe -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="wire" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#00D863;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#6B46C1;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <g stroke="url(#wire)" stroke-width="1.5" fill="none" opacity="0.8">
+                            <line x1="30" y1="40" x2="100" y2="40"/>
+                            <line x1="30" y1="40" x2="30" y2="85"/>
+                            <line x1="100" y1="40" x2="110" y2="50"/>
+                            <line x1="110" y1="50" x2="110" y2="80"/>
+                            <line x1="110" y1="80" x2="100" y2="90"/>
+                            <line x1="100" y1="90" x2="50" y2="90"/>
+                            <line x1="50" y1="90" x2="35" y2="105"/>
+                            <line x1="35" y1="105" x2="35" y2="90"/>
+                            <line x1="35" y1="90" x2="30" y2="85"/>
+                            <line x1="100" y1="40" x2="100" y2="90"/>
+                            <line x1="30" y1="85" x2="35" y2="90"/>
+                        </g>
+                        <g fill="url(#wire)">
+                            <circle cx="30" cy="40" r="2"/>
+                            <circle cx="100" cy="40" r="2"/>
+                            <circle cx="110" cy="50" r="2"/>
+                            <circle cx="110" cy="80" r="2"/>
+                            <circle cx="100" cy="90" r="2"/>
+                            <circle cx="50" cy="90" r="2"/>
+                            <circle cx="35" cy="105" r="2"/>
+                            <circle cx="35" cy="90" r="2"/>
+                            <circle cx="30" cy="85" r="2"/>
+                        </g>
+                        <text x="70" y="72" font-family="Inter, sans-serif" font-size="30" font-weight="400" fill="url(#wire)" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Wireframe Structure</div>
+                <div class="logo-description">Architectural blueprint style</div>
+            </div>
+            
+            <!-- Neon Outline -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="outline" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00D863;stop-opacity:1" />
+                            </linearGradient>
+                            <filter id="outglow">
+                                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <path d="M30 40 Q30 30, 40 30 L90 30 Q110 30, 110 50 L110 70 Q110 90, 90 90 L50 90 L35 105 L35 90 Q30 90, 30 85 Z" 
+                              fill="none" stroke="url(#outline)" stroke-width="2" filter="url(#outglow)"/>
+                        <g filter="url(#outglow)">
+                            <path d="M65 50 Q78 50, 78 60 Q78 70, 65 70 Q78 70, 78 80 Q78 90, 65 90" 
+                                  stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            <line x1="71" y1="45" x2="71" y2="95" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="logo-title">Neon Outline</div>
+                <div class="logo-description">Pure neon glow effect</div>
+            </div>
+            
+            <!-- Pixel Grid -->
+            <div class="logo-card">
+                <div class="logo-container">
+                    <svg width="120" height="120" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                        <g fill="#00D863">
+                            <!-- Top row -->
+                            <rect x="40" y="35" width="5" height="5"/>
+                            <rect x="45" y="35" width="5" height="5"/>
+                            <rect x="50" y="35" width="5" height="5"/>
+                            <rect x="55" y="35" width="5" height="5"/>
+                            <rect x="60" y="35" width="5" height="5"/>
+                            <rect x="65" y="35" width="5" height="5"/>
+                            <rect x="70" y="35" width="5" height="5"/>
+                            <rect x="75" y="35" width="5" height="5"/>
+                            <rect x="80" y="35" width="5" height="5"/>
+                            <rect x="85" y="35" width="5" height="5"/>
+                            <rect x="90" y="35" width="5" height="5"/>
+                            <rect x="95" y="35" width="5" height="5"/>
+                            
+                            <!-- Left column -->
+                            <rect x="35" y="40" width="5" height="5"/>
+                            <rect x="35" y="45" width="5" height="5"/>
+                            <rect x="35" y="50" width="5" height="5"/>
+                            <rect x="35" y="55" width="5" height="5"/>
+                            <rect x="35" y="60" width="5" height="5"/>
+                            <rect x="35" y="65" width="5" height="5"/>
+                            <rect x="35" y="70" width="5" height="5"/>
+                            <rect x="35" y="75" width="5" height="5"/>
+                            <rect x="35" y="80" width="5" height="5"/>
+                            <rect x="35" y="85" width="5" height="5"/>
+                            
+                            <!-- Right column -->
+                            <rect x="100" y="40" width="5" height="5"/>
+                            <rect x="105" y="45" width="5" height="5"/>
+                            <rect x="105" y="50" width="5" height="5"/>
+                            <rect x="105" y="55" width="5" height="5"/>
+                            <rect x="105" y="60" width="5" height="5"/>
+                            <rect x="105" y="65" width="5" height="5"/>
+                            <rect x="105" y="70" width="5" height="5"/>
+                            <rect x="105" y="75" width="5" height="5"/>
+                            <rect x="100" y="80" width="5" height="5"/>
+                            <rect x="100" y="85" width="5" height="5"/>
+                            
+                            <!-- Bottom row -->
+                            <rect x="40" y="90" width="5" height="5"/>
+                            <rect x="45" y="90" width="5" height="5"/>
+                            <rect x="50" y="90" width="5" height="5"/>
+                            <rect x="55" y="90" width="5" height="5"/>
+                            <rect x="60" y="90" width="5" height="5"/>
+                            <rect x="65" y="90" width="5" height="5"/>
+                            <rect x="70" y="90" width="5" height="5"/>
+                            <rect x="75" y="90" width="5" height="5"/>
+                            <rect x="80" y="90" width="5" height="5"/>
+                            <rect x="85" y="90" width="5" height="5"/>
+                            <rect x="90" y="90" width="5" height="5"/>
+                            <rect x="95" y="90" width="5" height="5"/>
+                            
+                            <!-- Tail -->
+                            <rect x="45" y="95" width="5" height="5"/>
+                            <rect x="40" y="100" width="5" height="5"/>
+                            <rect x="35" y="105" width="5" height="5"/>
+                        </g>
+                        <text x="70" y="72" font-family="Courier, monospace" font-size="28" font-weight="700" fill="white" text-anchor="middle">$</text>
+                    </svg>
+                </div>
+                <div class="logo-title">Pixel Grid</div>
+                <div class="logo-description">Retro-modern pixel art</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
